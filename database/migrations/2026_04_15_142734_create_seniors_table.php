@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-  public function up(): void
+ public function up(): void
 {
     Schema::create('seniors', function (Blueprint $table) {
         $table->id();
@@ -20,7 +20,7 @@ return new class extends Migration
         $table->date('birthdate')->nullable();
         $table->enum('sex', ['male', 'female'])->nullable();
         $table->string('contact_number')->nullable();
-        $table->foreignId('barangay_id')->nullable()->constrained('barangays')->nullOnDelete();
+        $table->unsignedBigInteger('barangay_id')->nullable();
         $table->string('status')->default('active');
         $table->timestamps();
     });
