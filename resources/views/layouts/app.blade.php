@@ -9,7 +9,7 @@
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-    <a class="navbar-brand fw-bold" href="/">Senior Payout System</a>
+    <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">Senior Payout System</a>
     <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
             <li class="nav-item"><a class="nav-link" href="{{ route('seniors.index') }}">Seniors</a></li>

@@ -2,64 +2,78 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Models\DocumentRequirement;
+use App\Models\PayoutCycle;
 use Illuminate\Http\Request;
 
 class DocumentRequirementController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $requirements = DocumentRequirement::with('cycle')->latest()->paginate(10);
+        return view('document-requirements.index', compact('requirements'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $cycles = PayoutCycle::all();
+        return view('document-requirements.create', compact('cycles'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'cycle_id'      => 'required|exists:payout_cycles,id',
+            'document_name' => 'required|string|max:255',
+            'description'   => 'nullable|string',
+            'is_mandatory'  => 'boolean',
+        ]);
+
+        DocumentRequirement::create([
+            'cycle_id'      => $request->cycle_id,
+            'document_name' => $request->document_name,
+            'description'   => $request->description,
+            'is_mandatory'  => $request->has('is_mandatory') ? 1 : 0,
+        ]);
+
+        return redirect()->route('document-requirements.index')
+            ->with('success', 'Document requirement added.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(DocumentRequirement $documentRequirement)
     {
-        //
+        return view('document-requirements.show', compact('documentRequirement'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(DocumentRequirement $documentRequirement)
     {
-        //
+        $cycles = PayoutCycle::all();
+        return view('document-requirements.edit', compact('documentRequirement', 'cycles'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, DocumentRequirement $documentRequirement)
     {
-        //
+        $request->validate([
+            'cycle_id'      => 'required|exists:payout_cycles,id',
+            'document_name' => 'required|string|max:255',
+            'description'   => 'nullable|string',
+        ]);
+
+        $documentRequirement->update([
+            'cycle_id'      => $request->cycle_id,
+            'document_name' => $request->document_name,
+            'description'   => $request->description,
+            'is_mandatory'  => $request->has('is_mandatory') ? 1 : 0,
+        ]);
+
+        return redirect()->route('document-requirements.index')
+            ->with('success', 'Document requirement updated.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(DocumentRequirement $documentRequirement)
     {
-        //
+        $documentRequirement->delete();
+        return redirect()->route('document-requirements.index')
+            ->with('success', 'Document requirement deleted.');
     }
 }
