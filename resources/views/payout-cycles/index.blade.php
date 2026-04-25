@@ -1,48 +1,66 @@
 @extends('layouts.app')
+@section('topbar-title', 'Payout cycles')
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Payout Cycles</h2>
-    <a href="{{ route('payout-cycles.create') }}" class="btn btn-primary">+ New Cycle</a>
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Payouts</div>
+        <h2 class="page-title">Payout cycles</h2>
+        <div class="page-sub">Disbursement periods configured for the program.</div>
+    </div>
+    <div class="page-actions">
+        <a href="{{ route('payout-cycles.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> New cycle
+        </a>
+    </div>
 </div>
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>Cycle Name</th>
-            <th>Period Start</th>
-            <th>Period End</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @forelse($cycles as $cycle)
-        <tr>
-            <td>{{ $cycle->cycle_name }}</td>
-            <td>{{ $cycle->period_start }}</td>
-            <td>{{ $cycle->period_end }}</td>
-            <td>
-                @if($cycle->status === 'active')
-                    <span class="badge bg-success">Active</span>
-                @elseif($cycle->status === 'draft')
-                    <span class="badge bg-secondary">Draft</span>
-                @else
-                    <span class="badge bg-dark">Completed</span>
-                @endif
-            </td>
-            <td>
-                <a href="{{ route('payout-cycles.show', $cycle) }}" class="btn btn-sm btn-info">View</a>
-                <a href="{{ route('payout-cycles.edit', $cycle) }}" class="btn btn-sm btn-warning">Edit</a>
-                <form action="{{ route('payout-cycles.destroy', $cycle) }}" method="POST" class="d-inline"
-                    onsubmit="return confirm('Delete this cycle?')">
-                    @csrf @method('DELETE')
-                    <button class="btn btn-sm btn-danger">Delete</button>
-                </form>
-            </td>
-        </tr>
-        @empty
-        <tr><td colspan="5" class="text-center">No payout cycles yet.</td></tr>
-        @endforelse
-    </tbody>
-</table>
-{{ $cycles->links() }}
+
+<div class="table-wrap">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Cycle name</th>
+                <th>Period start</th>
+                <th>Period end</th>
+                <th>Status</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($cycles as $cycle)
+                <tr>
+                    <td class="fw-semibold">{{ $cycle->cycle_name }}</td>
+                    <td>{{ $cycle->period_start }}</td>
+                    <td>{{ $cycle->period_end }}</td>
+                    <td>
+                        @if($cycle->status === 'active')
+                            <span class="pill pill-success">Active</span>
+                        @elseif($cycle->status === 'draft')
+                            <span class="pill pill-muted">Draft</span>
+                        @else
+                            <span class="pill pill-dark">Completed</span>
+                        @endif
+                    </td>
+                    <td class="text-end">
+                        <div class="row-actions">
+                            <a href="{{ route('payout-cycles.show', $cycle) }}" class="row-action view" title="View"><i class="bi bi-eye"></i></a>
+                            <a href="{{ route('payout-cycles.edit', $cycle) }}" class="row-action edit" title="Edit"><i class="bi bi-pencil"></i></a>
+                            <form action="{{ route('payout-cycles.destroy', $cycle) }}" method="POST"
+                                onsubmit="return confirm('Delete this cycle?')" class="d-inline">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="row-action delete" title="Delete"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            @empty
+                <tr><td colspan="5" class="table-empty">No payout cycles configured yet.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-3">
+    {{ $cycles->links() }}
+</div>
 @endsection

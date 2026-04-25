@@ -1,87 +1,106 @@
 @extends('layouts.app')
+@section('topbar-title', 'Transaction details')
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Transaction Details</h2>
-    <a href="{{ route('payout-transactions.index') }}" class="btn btn-secondary">Back</a>
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow"><a href="{{ route('payout-transactions.index') }}" class="text-muted text-decoration-none">Transactions</a> / Details</div>
+        <h2 class="page-title">{{ $payoutTransaction->senior->name ?? 'Transaction' }}</h2>
+        <div class="page-sub">{{ $payoutTransaction->cycle->cycle_name ?? '—' }} · ₱{{ number_format($payoutTransaction->amount, 2) }}</div>
+    </div>
+    <div class="page-actions">
+        <a href="{{ route('payout-transactions.index') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+        <a href="{{ route('payout-transactions.edit', $payoutTransaction) }}" class="btn btn-primary">
+            <i class="bi bi-pencil me-1"></i> Edit
+        </a>
+    </div>
 </div>
 
-<div class="card p-4 mb-4">
-    <div class="row">
-        <div class="col-md-6">
-            <p><strong>Senior:</strong> {{ $payoutTransaction->senior->name ?? '—' }}</p>
-            <p><strong>OSCA ID:</strong> {{ $payoutTransaction->senior->osca_id ?? '—' }}</p>
-            <p><strong>Cycle:</strong> {{ $payoutTransaction->cycle->cycle_name ?? '—' }}</p>
-            <p><strong>Schedule:</strong>
-                {{ $payoutTransaction->schedule->scheduled_date ?? '—' }}
-            </p>
-        </div>
-        <div class="col-md-6">
-            <p><strong>Counter:</strong>
-                {{ $payoutTransaction->counter->counter_number ?? '—' }}
-            </p>
-            <p><strong>Amount:</strong>
-                ₱{{ number_format($payoutTransaction->amount, 2) }}
-            </p>
-            <p><strong>Processed By:</strong>
-                {{ $payoutTransaction->processor->name ?? '—' }}
-            </p>
-            <p><strong>Claimed At:</strong>
-                {{ $payoutTransaction->claimed_at ?? '—' }}
-            </p>
-            <p><strong>Remarks:</strong>
-                {{ $payoutTransaction->remarks ?? '—' }}
-            </p>
-        </div>
-    </div>
-
-    <div class="mt-3">
-        <strong>Current Status:</strong>
+<div class="surface mb-3">
+    <div class="surface-head">
+        <h5>Transaction information</h5>
         @if($payoutTransaction->claim_status === 'claimed')
-            <span class="badge bg-success fs-6">Claimed</span>
+            <span class="pill pill-success">Claimed</span>
         @elseif($payoutTransaction->claim_status === 'unclaimed')
-            <span class="badge bg-warning text-dark fs-6">Unclaimed</span>
+            <span class="pill pill-warning">Unclaimed</span>
         @else
-            <span class="badge bg-danger fs-6">Cancelled</span>
+            <span class="pill pill-danger">Cancelled</span>
         @endif
     </div>
+    <div class="surface-body">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <dl class="deflist">
+                    <dt>Senior</dt><dd>{{ $payoutTransaction->senior->name ?? '—' }}</dd>
+                    <dt>OSCA ID</dt><dd>{{ $payoutTransaction->senior->osca_id ?? '—' }}</dd>
+                    <dt>Cycle</dt><dd>{{ $payoutTransaction->cycle->cycle_name ?? '—' }}</dd>
+                    <dt>Schedule</dt><dd>{{ $payoutTransaction->schedule->scheduled_date ?? '—' }}</dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl class="deflist">
+                    <dt>Counter</dt><dd>{{ $payoutTransaction->counter->counter_number ?? '—' }}</dd>
+                    <dt>Amount</dt><dd>₱{{ number_format($payoutTransaction->amount, 2) }}</dd>
+                    <dt>Processed by</dt><dd>{{ $payoutTransaction->processor->name ?? '—' }}</dd>
+                    <dt>Claimed at</dt><dd>{{ $payoutTransaction->claimed_at ?? '—' }}</dd>
+                    <dt>Remarks</dt><dd>{{ $payoutTransaction->remarks ?? '—' }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
 </div>
 
-<h5>Update Claim Status</h5>
-<div class="card p-4 mb-4">
-    <form action="{{ route('payout-transactions.updateStatus', $payoutTransaction) }}" method="POST">
-        @csrf @method('PATCH')
-        <div class="d-flex align-items-center gap-3">
-            <select name="claim_status" class="form-control w-auto">
-                <option value="unclaimed" {{ $payoutTransaction->claim_status == 'unclaimed' ? 'selected' : '' }}>Unclaimed</option>
-                <option value="claimed"   {{ $payoutTransaction->claim_status == 'claimed'   ? 'selected' : '' }}>Claimed</option>
-                <option value="cancelled" {{ $payoutTransaction->claim_status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-            </select>
-            <button type="submit" class="btn btn-primary">Update Status</button>
-        </div>
-    </form>
+<div class="surface mb-3">
+    <div class="surface-head">
+        <h5>Update claim status</h5>
+    </div>
+    <div class="surface-body">
+        <form action="{{ route('payout-transactions.updateStatus', $payoutTransaction) }}" method="POST" class="d-flex flex-wrap align-items-end gap-2">
+            @csrf @method('PATCH')
+            <div style="min-width: 220px;">
+                <label class="form-label" for="claim_status">Claim status</label>
+                <select name="claim_status" id="claim_status" class="form-select">
+                    <option value="unclaimed" {{ $payoutTransaction->claim_status == 'unclaimed' ? 'selected' : '' }}>Unclaimed</option>
+                    <option value="claimed"   {{ $payoutTransaction->claim_status == 'claimed'   ? 'selected' : '' }}>Claimed</option>
+                    <option value="cancelled" {{ $payoutTransaction->claim_status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Update status</button>
+        </form>
+    </div>
 </div>
 
 @if($payoutTransaction->submissions->count())
-<h5>Document Submissions</h5>
-<table class="table table-bordered">
-    <thead class="table-dark">
-        <tr><th>Document</th><th>Submitted</th><th>Notes</th></tr>
-    </thead>
-    <tbody>
-        @foreach($payoutTransaction->submissions as $submission)
-        <tr>
-            <td>{{ $submission->requirement->document_name ?? '—' }}</td>
-            <td>
-                @if($submission->is_submitted)
-                    <span class="badge bg-success">Yes</span>
-                @else
-                    <span class="badge bg-danger">No</span>
-                @endif
-            </td>
-            <td>{{ $submission->notes ?? '—' }}</td>
-        </tr>
-        @endforeach
-    </tbody>
-</table>
+<div class="surface">
+    <div class="surface-head">
+        <h5>Document submissions</h5>
+    </div>
+    <table class="table mb-0">
+        <thead>
+            <tr>
+                <th>Document</th>
+                <th>Submitted</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($payoutTransaction->submissions as $submission)
+                <tr>
+                    <td class="fw-semibold">{{ $submission->requirement->document_name ?? '—' }}</td>
+                    <td>
+                        @if($submission->is_submitted)
+                            <span class="pill pill-success">Submitted</span>
+                        @else
+                            <span class="pill pill-danger">Missing</span>
+                        @endif
+                    </td>
+                    <td class="text-muted">{{ $submission->notes ?? '—' }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
 @endif
 @endsection
