@@ -12,26 +12,36 @@ use App\Http\Controllers\PayoutTransactionController;
 use App\Http\Controllers\DocumentSubmissionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.store');
+});
 
-Route::resource('seniors', SeniorController::class);
-Route::resource('barangays', BarangayController::class);
-Route::resource('payout-cycles', PayoutCycleController::class);
-Route::resource('payout-schedules', PayoutScheduleController::class);
-Route::resource('document-requirements', DocumentRequirementController::class);
-Route::resource('counters', CounterController::class);
-Route::resource('staff-assignments', StaffAssignmentController::class);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
-Route::resource('payout-transactions', PayoutTransactionController::class);
-Route::patch('payout-transactions/{payoutTransaction}/status', [PayoutTransactionController::class, 'updateStatus'])
-    ->name('payout-transactions.updateStatus');
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-Route::resource('document-submissions', DocumentSubmissionController::class);
+    Route::resource('seniors', SeniorController::class);
+    Route::resource('barangays', BarangayController::class);
+    Route::resource('payout-cycles', PayoutCycleController::class);
+    Route::resource('payout-schedules', PayoutScheduleController::class);
+    Route::resource('document-requirements', DocumentRequirementController::class);
+    Route::resource('counters', CounterController::class);
+    Route::resource('staff-assignments', StaffAssignmentController::class);
 
-Route::post('reports/generate', [ReportController::class, 'generate'])->name('reports.generate');
-Route::resource('reports', ReportController::class);
+    Route::resource('payout-transactions', PayoutTransactionController::class);
+    Route::patch('payout-transactions/{payoutTransaction}/status', [PayoutTransactionController::class, 'updateStatus'])
+        ->name('payout-transactions.updateStatus');
+
+    Route::resource('document-submissions', DocumentSubmissionController::class);
+
+    Route::post('reports/generate', [ReportController::class, 'generate'])->name('reports.generate');
+    Route::resource('reports', ReportController::class);
+});
