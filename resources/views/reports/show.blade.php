@@ -77,25 +77,25 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($transactions as $transaction)
-                <tr>
-                    <td class="fw-semibold">{{ $transaction->senior->name ?? '—' }}</td>
-                    <td class="text-muted">{{ $transaction->senior->osca_id ?? '—' }}</td>
-                    <td class="text-end fw-semibold">₱{{ number_format($transaction->amount, 2) }}</td>
-                    <td>
-                        @if($transaction->claim_status === 'claimed')
-                            <span class="pill pill-success">Claimed</span>
-                        @elseif($transaction->claim_status === 'unclaimed')
-                            <span class="pill pill-warning">Unclaimed</span>
-                        @else
-                            <span class="pill pill-danger">Cancelled</span>
-                        @endif
-                    </td>
-                    <td class="text-muted">{{ $transaction->claimed_at ?? '—' }}</td>
-                </tr>
-            @empty
-                <tr><td colspan="5" class="table-empty">No transactions for this cycle.</td></tr>
-            @endforelse
+           @forelse($transactions as $transaction)
+<tr>
+    <td>{{ $transaction->senior_name ?? '—' }}</td>
+    <td>{{ $transaction->osca_id ?? '—' }}</td>
+    <td>₱{{ number_format($transaction->amount, 2) }}</td>
+    <td>
+        @if($transaction->claim_status === 'claimed')
+            <span class="badge bg-success">Claimed</span>
+        @elseif($transaction->claim_status === 'unclaimed')
+            <span class="badge bg-warning text-dark">Unclaimed</span>
+        @else
+            <span class="badge bg-danger">Cancelled</span>
+        @endif
+    </td>
+    <td>{{ $transaction->claimed_at ?? '—' }}</td>
+</tr>
+@empty
+<tr><td colspan="5" class="text-center">No transactions for this cycle.</td></tr>
+@endforelse
         </tbody>
     </table>
 </div>

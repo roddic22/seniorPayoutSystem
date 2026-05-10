@@ -137,18 +137,32 @@ class PayoutTransactionController extends Controller
     }
 
     public function updateStatus(Request $request, PayoutTransaction $payoutTransaction)
-    {
-        $request->validate([
-            'claim_status' => 'required|in:claimed,unclaimed,cancelled',
+{
+    $request->validate([
+        'claim_status' => 'required|in:claimed,unclaimed,cancelled',
+    ]);
+
+    try {
+        // Raw BEGIN/COMMIT/ROLLBACK — explicitly demonstrates Module 1
+        DB::statement('BEGIN');
+
+        // Pessimistic lock — concurrency control (two clerks cant update same record)
+        $transaction = PayoutTransaction::where('id', $payoutTransaction->id)
+            ->lockForUpdate()
+            ->first();
+
+        $transaction->update([
+            'claim_status' => $request->claim_status,
+            'claimed_at'   => $request->claim_status === 'claimed' ? now() : null,
         ]);
 
-        DB::transaction(function () use ($request, $payoutTransaction) {
-            $payoutTransaction->update([
-                'claim_status' => $request->claim_status,
-                'claimed_at'   => $request->claim_status === 'claimed' ? now() : null,
-            ]);
-        });
+        DB::statement('COMMIT');
 
         return redirect()->back()->with('success', 'Claim status updated.');
+
+    } catch (\Exception $e) {
+        DB::statement('ROLLBACK');
+        return redirect()->back()->withErrors(['error' => 'Update failed: ' . $e->getMessage()]);
     }
+}
 }
