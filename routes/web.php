@@ -44,4 +44,15 @@ Route::middleware('auth')->group(function () {
 
     Route::post('reports/generate', [ReportController::class, 'generate'])->name('reports.generate');
     Route::resource('reports', ReportController::class);
+
+    Route::get('/explain-demo', function () {
+    $results = DB::select("
+        EXPLAIN SELECT payout_transactions.*, seniors.name
+        FROM payout_transactions
+        JOIN seniors ON seniors.id = payout_transactions.senior_id
+        WHERE payout_transactions.claim_status = 'claimed'
+    ");
+    return view('explain-demo', ['results' => $results]);
+})->name('explain.demo');
+
 });
