@@ -707,10 +707,15 @@
                 <i class="bi bi-person-badge"></i> Staff Assignments
             </a>
 
+            <a class="sidebar-link {{ request()->routeIs('staff.*') ? 'active' : '' }}" href="{{ route('staff.index') }}">
+    <i class="bi bi-person-lines-fill"></i> Staff
+</a>
+
             <div class="sidebar-heading">Insights</div>
 <a class="sidebar-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}">
     <i class="bi bi-bar-chart"></i> Reports
 </a>
+
 <a class="sidebar-link {{ request()->routeIs('explain.demo') ? 'active' : '' }}" href="{{ route('explain.demo') }}">
     <i class="bi bi-lightning"></i> EXPLAIN Demo
 </a>
