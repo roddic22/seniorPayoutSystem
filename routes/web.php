@@ -13,6 +13,8 @@ use App\Http\Controllers\DocumentSubmissionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\StaffController;
+use Illuminate\Support\Facades\DB;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -35,6 +37,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('document-requirements', DocumentRequirementController::class);
     Route::resource('counters', CounterController::class);
     Route::resource('staff-assignments', StaffAssignmentController::class);
+    Route::resource('staff', StaffController::class);
 
     Route::resource('payout-transactions', PayoutTransactionController::class);
     Route::patch('payout-transactions/{payoutTransaction}/status', [PayoutTransactionController::class, 'updateStatus'])
@@ -45,14 +48,14 @@ Route::middleware('auth')->group(function () {
     Route::post('reports/generate', [ReportController::class, 'generate'])->name('reports.generate');
     Route::resource('reports', ReportController::class);
 
+    // Module 3 — EXPLAIN demo
     Route::get('/explain-demo', function () {
-    $results = DB::select("
-        EXPLAIN SELECT payout_transactions.*, seniors.name
-        FROM payout_transactions
-        JOIN seniors ON seniors.id = payout_transactions.senior_id
-        WHERE payout_transactions.claim_status = 'claimed'
-    ");
-    return view('explain-demo', ['results' => $results]);
-})->name('explain.demo');
-
+        $results = DB::select("
+            EXPLAIN SELECT payout_transactions.id, payout_transactions.amount, payout_transactions.claim_status
+            FROM payout_transactions
+            JOIN seniors ON seniors.id = payout_transactions.senior_id
+            WHERE payout_transactions.claim_status = 'claimed'
+        ");
+        return view('explain-demo', ['results' => $results]);
+    })->name('explain.demo');
 });
