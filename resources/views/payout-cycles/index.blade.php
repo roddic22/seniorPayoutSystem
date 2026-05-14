@@ -9,9 +9,11 @@
         <div class="page-sub">Disbursement periods configured for the program.</div>
     </div>
     <div class="page-actions">
+        @if(auth()->user()->role === 'admin')
         <a href="{{ route('payout-cycles.create') }}" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i> New cycle
         </a>
+        @endif
     </div>
 </div>
 
@@ -44,12 +46,14 @@
                     <td class="text-end">
                         <div class="row-actions">
                             <a href="{{ route('payout-cycles.show', $cycle) }}" class="row-action view" title="View"><i class="bi bi-eye"></i></a>
+                            @if(auth()->user()->role === 'admin')
                             <a href="{{ route('payout-cycles.edit', $cycle) }}" class="row-action edit" title="Edit"><i class="bi bi-pencil"></i></a>
                             <form action="{{ route('payout-cycles.destroy', $cycle) }}" method="POST"
                                 onsubmit="return confirm('Delete this cycle?')" class="d-inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="row-action delete" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
+                            @endif
                         </div>
                     </td>
                 </tr>

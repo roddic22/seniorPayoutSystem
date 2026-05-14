@@ -204,9 +204,11 @@
         <div class="page-sub">Browse registered seniors by barangay to keep the list focused.</div>
     </div>
     <div class="page-actions">
+        @if(auth()->user()->role === 'admin')
         <a href="{{ route('seniors.create') }}" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i> Add senior
         </a>
+        @endif
     </div>
 </div>
 
@@ -345,12 +347,14 @@
                             <td class="text-end">
                                 <div class="row-actions">
                                     <a href="{{ route('seniors.show', $senior) }}" class="row-action view" title="View" aria-label="View senior"><i class="bi bi-eye"></i></a>
+                                    @if(auth()->user()->role === 'admin')
                                     <a href="{{ route('seniors.edit', $senior) }}" class="row-action edit" title="Edit" aria-label="Edit senior"><i class="bi bi-pencil"></i></a>
                                     <form action="{{ route('seniors.destroy', $senior) }}" method="POST"
                                         onsubmit="return confirm('Delete this senior record?')" class="d-inline">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="row-action delete" title="Delete" aria-label="Delete senior"><i class="bi bi-trash"></i></button>
                                     </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -360,9 +364,11 @@
                                 <div class="senior-empty-icon"><i class="bi bi-people"></i></div>
                                 <h5>No matching seniors found</h5>
                                 <p>Try another name or choose a different barangay.</p>
+                                @if(auth()->user()->role === 'admin')
                                 <a href="{{ route('seniors.create') }}" class="btn btn-primary btn-sm">
                                     <i class="bi bi-plus-lg me-1"></i> Add senior
                                 </a>
+                                @endif
                             </td>
                         </tr>
                     @endforelse

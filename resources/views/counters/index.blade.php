@@ -9,9 +9,11 @@
         <div class="page-sub">Service windows used during disbursement.</div>
     </div>
     <div class="page-actions">
+        @if(auth()->user()->role === 'admin')
         <a href="{{ route('counters.create') }}" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i> Add counter
         </a>
+        @endif
     </div>
 </div>
 
@@ -40,12 +42,14 @@
                     <td class="text-end">
                         <div class="row-actions">
                             <a href="{{ route('counters.show', $counter) }}" class="row-action view" title="View"><i class="bi bi-eye"></i></a>
+                            @if(auth()->user()->role === 'admin')
                             <a href="{{ route('counters.edit', $counter) }}" class="row-action edit" title="Edit"><i class="bi bi-pencil"></i></a>
                             <form action="{{ route('counters.destroy', $counter) }}" method="POST"
                                 onsubmit="return confirm('Delete this counter?')" class="d-inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="row-action delete" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
+                            @endif
                         </div>
                     </td>
                 </tr>

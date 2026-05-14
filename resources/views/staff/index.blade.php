@@ -9,9 +9,11 @@
         <h1 class="page-title">Staff Members</h1>
     </div>
     <div class="page-actions">
+        @if(auth()->user()->role === 'admin')
         <a href="{{ route('staff.create') }}" class="btn btn-primary">
             <i class="bi bi-person-plus me-1"></i> Add Staff
         </a>
+        @endif
     </div>
 </div>
 
@@ -51,6 +53,7 @@
                             class="row-action view" title="View">
                             <i class="bi bi-eye"></i>
                         </a>
+                        @if(auth()->user()->role === 'admin')
                         <a href="{{ route('staff.edit', $member) }}"
                             class="row-action edit" title="Edit">
                             <i class="bi bi-pencil"></i>
@@ -64,6 +67,7 @@
                                 <i class="bi bi-trash"></i>
                             </button>
                         </form>
+                        @endif
                         @endif
                     </div>
                 </td>

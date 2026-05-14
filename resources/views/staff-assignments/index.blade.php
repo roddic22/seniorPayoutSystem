@@ -9,9 +9,11 @@
         <div class="page-sub">Counter assignments per payout schedule.</div>
     </div>
     <div class="page-actions">
+        @if(auth()->user()->role === 'admin')
         <a href="{{ route('staff-assignments.create') }}" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i> Assign staff
         </a>
+        @endif
     </div>
 </div>
 
@@ -38,12 +40,14 @@
                     <td class="text-end">
                         <div class="row-actions">
                             <a href="{{ route('staff-assignments.show', $assignment) }}" class="row-action view" title="View"><i class="bi bi-eye"></i></a>
+                            @if(auth()->user()->role === 'admin')
                             <a href="{{ route('staff-assignments.edit', $assignment) }}" class="row-action edit" title="Edit"><i class="bi bi-pencil"></i></a>
                             <form action="{{ route('staff-assignments.destroy', $assignment) }}" method="POST"
                                 onsubmit="return confirm('Remove this assignment?')" class="d-inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="row-action delete" title="Remove"><i class="bi bi-trash"></i></button>
                             </form>
+                            @endif
                         </div>
                     </td>
                 </tr>

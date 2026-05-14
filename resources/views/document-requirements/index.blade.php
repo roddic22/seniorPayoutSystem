@@ -9,9 +9,11 @@
         <div class="page-sub">Required documents per payout cycle.</div>
     </div>
     <div class="page-actions">
+        @if(auth()->user()->role === 'admin')
         <a href="{{ route('document-requirements.create') }}" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i> Add requirement
         </a>
+        @endif
     </div>
 </div>
 
@@ -42,12 +44,14 @@
                     <td class="text-end">
                         <div class="row-actions">
                             <a href="{{ route('document-requirements.show', $req) }}" class="row-action view" title="View"><i class="bi bi-eye"></i></a>
+                            @if(auth()->user()->role === 'admin')
                             <a href="{{ route('document-requirements.edit', $req) }}" class="row-action edit" title="Edit"><i class="bi bi-pencil"></i></a>
                             <form action="{{ route('document-requirements.destroy', $req) }}" method="POST"
                                 onsubmit="return confirm('Delete this requirement?')" class="d-inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="row-action delete" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
+                            @endif
                         </div>
                     </td>
                 </tr>

@@ -57,11 +57,13 @@
                     <td class="text-end">
                         <div class="row-actions">
                             <a href="{{ route('reports.show', $report) }}" class="row-action view" title="View"><i class="bi bi-eye"></i></a>
+                            @if(auth()->user()->role === 'admin')
                             <form action="{{ route('reports.destroy', $report) }}" method="POST"
                                 onsubmit="return confirm('Delete this report?')" class="d-inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="row-action delete" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
+                            @endif
                         </div>
                     </td>
                 </tr>

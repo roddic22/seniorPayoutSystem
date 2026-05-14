@@ -9,9 +9,11 @@
         <div class="page-sub">Service-area barangays and senior counts.</div>
     </div>
     <div class="page-actions">
+        @if(auth()->user()->role === 'admin')
         <a href="{{ route('barangays.create') }}" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i> Add barangay
         </a>
+        @endif
     </div>
 </div>
 
@@ -37,13 +39,25 @@
                     </td>
                     <td class="text-end">
                         <div class="row-actions">
-                            <a href="{{ route('barangays.show', $barangay) }}" class="row-action view" title="View"><i class="bi bi-eye"></i></a>
-                            <a href="{{ route('barangays.edit', $barangay) }}" class="row-action edit" title="Edit"><i class="bi bi-pencil"></i></a>
-                            <form action="{{ route('barangays.destroy', $barangay) }}" method="POST"
-                                onsubmit="return confirm('Delete this barangay?')" class="d-inline">
+                            <a href="{{ route('barangays.show', $barangay) }}"
+                                class="row-action view" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            @if(auth()->user()->role === 'admin')
+                            <a href="{{ route('barangays.edit', $barangay) }}"
+                                class="row-action edit" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form action="{{ route('barangays.destroy', $barangay) }}"
+                                method="POST"
+                                onsubmit="return confirm('Delete this barangay?')"
+                                class="d-inline">
                                 @csrf @method('DELETE')
-                                <button type="submit" class="row-action delete" title="Delete"><i class="bi bi-trash"></i></button>
+                                <button type="submit" class="row-action delete" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </form>
+                            @endif
                         </div>
                     </td>
                 </tr>

@@ -9,9 +9,11 @@
         <div class="page-sub">Per-barangay disbursement schedules.</div>
     </div>
     <div class="page-actions">
+        @if(auth()->user()->role === 'admin')
         <a href="{{ route('payout-schedules.create') }}" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i> New schedule
         </a>
+        @endif
     </div>
 </div>
 
@@ -40,12 +42,14 @@
                     <td class="text-end">
                         <div class="row-actions">
                             <a href="{{ route('payout-schedules.show', $schedule) }}" class="row-action view" title="View"><i class="bi bi-eye"></i></a>
+                            @if(auth()->user()->role === 'admin')
                             <a href="{{ route('payout-schedules.edit', $schedule) }}" class="row-action edit" title="Edit"><i class="bi bi-pencil"></i></a>
                             <form action="{{ route('payout-schedules.destroy', $schedule) }}" method="POST"
                                 onsubmit="return confirm('Delete this schedule?')" class="d-inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="row-action delete" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
+                            @endif
                         </div>
                     </td>
                 </tr>

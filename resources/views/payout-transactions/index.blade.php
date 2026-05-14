@@ -48,13 +48,13 @@
                     <td class="text-end">
                         <div class="row-actions">
                             <a href="{{ route('payout-transactions.show', $transaction) }}" class="row-action view" title="View"><i class="bi bi-eye"></i></a>
-                            @if(auth()->user()?->role !== 'staff')
-                                <a href="{{ route('payout-transactions.edit', $transaction) }}" class="row-action edit" title="Edit"><i class="bi bi-pencil"></i></a>
-                                <form action="{{ route('payout-transactions.destroy', $transaction) }}" method="POST"
-                                    onsubmit="return confirm('Delete this transaction?')" class="d-inline">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="row-action delete" title="Delete"><i class="bi bi-trash"></i></button>
-                                </form>
+                            @if(auth()->user()->role === 'admin')
+                            <a href="{{ route('payout-transactions.edit', $transaction) }}" class="row-action edit" title="Edit"><i class="bi bi-pencil"></i></a>
+                            <form action="{{ route('payout-transactions.destroy', $transaction) }}" method="POST"
+                                onsubmit="return confirm('Delete this transaction?')" class="d-inline">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="row-action delete" title="Delete"><i class="bi bi-trash"></i></button>
+                            </form>
                             @endif
                         </div>
                     </td>

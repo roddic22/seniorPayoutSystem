@@ -675,55 +675,71 @@
             </span>
         </a>
 
-        <nav class="sidebar-menu">
-            <div class="sidebar-heading">Overview</div>
-            <a class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                <i class="bi bi-grid-1x2"></i> Dashboard
-            </a>
+       <nav class="sidebar-menu">
+    <div class="sidebar-heading">Overview</div>
+    <a class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"
+        href="{{ route('dashboard') }}">
+        <i class="bi bi-grid-1x2"></i> Dashboard
+    </a>
 
-            <div class="sidebar-heading">Records</div>
-            <a class="sidebar-link {{ request()->routeIs('seniors.*') ? 'active' : '' }}" href="{{ route('seniors.index') }}">
-                <i class="bi bi-people"></i> Seniors
-            </a>
-            <a class="sidebar-link {{ request()->routeIs('barangays.*') ? 'active' : '' }}" href="{{ route('barangays.index') }}">
-                <i class="bi bi-geo-alt"></i> Barangays
-            </a>
+    <div class="sidebar-heading">Records</div>
+    <a class="sidebar-link {{ request()->routeIs('seniors.*') ? 'active' : '' }}"
+        href="{{ route('seniors.index') }}">
+        <i class="bi bi-people"></i> Seniors
+    </a>
+    <a class="sidebar-link {{ request()->routeIs('barangays.*') ? 'active' : '' }}"
+        href="{{ route('barangays.index') }}">
+        <i class="bi bi-geo-alt"></i> Barangays
+    </a>
 
-            <div class="sidebar-heading">Payouts</div>
-            <a class="sidebar-link {{ request()->routeIs('payout-cycles.*') ? 'active' : '' }}" href="{{ route('payout-cycles.index') }}">
-                <i class="bi bi-arrow-repeat"></i> Cycles
-            </a>
-            <a class="sidebar-link {{ request()->routeIs('payout-schedules.*') ? 'active' : '' }}" href="{{ route('payout-schedules.index') }}">
-                <i class="bi bi-calendar3"></i> Schedules
-            </a>
-            <a class="sidebar-link {{ request()->routeIs('payout-transactions.*') ? 'active' : '' }}" href="{{ route('payout-transactions.index') }}">
-                <i class="bi bi-receipt"></i> Transactions
-            </a>
+    <div class="sidebar-heading">Payouts</div>
+    <a class="sidebar-link {{ request()->routeIs('payout-cycles.*') ? 'active' : '' }}"
+        href="{{ route('payout-cycles.index') }}">
+        <i class="bi bi-arrow-repeat"></i> Cycles
+    </a>
+    <a class="sidebar-link {{ request()->routeIs('payout-schedules.*') ? 'active' : '' }}"
+        href="{{ route('payout-schedules.index') }}">
+        <i class="bi bi-calendar3"></i> Schedules
+    </a>
+    <a class="sidebar-link {{ request()->routeIs('payout-transactions.*') ? 'active' : '' }}"
+        href="{{ route('payout-transactions.index') }}">
+        <i class="bi bi-receipt"></i> Transactions
+    </a>
 
-            <div class="sidebar-heading">Operations</div>
-            <a class="sidebar-link {{ request()->routeIs('document-requirements.*') ? 'active' : '' }}" href="{{ route('document-requirements.index') }}">
-                <i class="bi bi-file-earmark-check"></i> Requirements
-            </a>
-            <a class="sidebar-link {{ request()->routeIs('counters.*') ? 'active' : '' }}" href="{{ route('counters.index') }}">
-                <i class="bi bi-window-stack"></i> Counters
-            </a>
-            <a class="sidebar-link {{ request()->routeIs('staff-assignments.*') ? 'active' : '' }}" href="{{ route('staff-assignments.index') }}">
-                <i class="bi bi-person-badge"></i> Staff Assignments
-            </a>
+    <div class="sidebar-heading">Operations</div>
+    <a class="sidebar-link {{ request()->routeIs('document-requirements.*') ? 'active' : '' }}"
+        href="{{ route('document-requirements.index') }}">
+        <i class="bi bi-file-earmark-check"></i> Requirements
+    </a>
 
-            <a class="sidebar-link {{ request()->routeIs('staff.*') ? 'active' : '' }}" href="{{ route('staff.index') }}">
-    <i class="bi bi-person-lines-fill"></i> Staff
-</a>
+    @if(auth()->user()->role === 'admin')
+    <a class="sidebar-link {{ request()->routeIs('counters.*') ? 'active' : '' }}"
+        href="{{ route('counters.index') }}">
+        <i class="bi bi-window-stack"></i> Counters
+    </a>
+    <a class="sidebar-link {{ request()->routeIs('staff-assignments.*') ? 'active' : '' }}"
+        href="{{ route('staff-assignments.index') }}">
+        <i class="bi bi-person-badge"></i> Staff Assignments
+    </a>
+    <a class="sidebar-link {{ request()->routeIs('staff.*') ? 'active' : '' }}"
+        href="{{ route('staff.index') }}">
+        <i class="bi bi-person-lines-fill"></i> Staff
+    </a>
+    @endif
 
-            <div class="sidebar-heading">Insights</div>
-<a class="sidebar-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}">
-    <i class="bi bi-bar-chart"></i> Reports
-</a>
+    <div class="sidebar-heading">Insights</div>
+    <a class="sidebar-link {{ request()->routeIs('reports.*') ? 'active' : '' }}"
+        href="{{ route('reports.index') }}">
+        <i class="bi bi-bar-chart"></i> Reports
+    </a>
 
-<a class="sidebar-link {{ request()->routeIs('explain.demo') ? 'active' : '' }}" href="{{ route('explain.demo') }}">
-    <i class="bi bi-lightning"></i> EXPLAIN Demo
-</a>
-        </nav>
+    @if(auth()->user()->role === 'admin')
+    <a class="sidebar-link {{ request()->routeIs('explain.demo') ? 'active' : '' }}"
+        href="{{ route('explain.demo') }}">
+        <i class="bi bi-lightning"></i> EXPLAIN Demo
+    </a>
+    @endif
+</nav>
     </aside>
 
     <div class="app-main">
