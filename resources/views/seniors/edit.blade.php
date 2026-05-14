@@ -15,28 +15,43 @@
     <div class="surface mb-3">
         <div class="form-section">
             <div class="form-section-title">Identification</div>
+            <div class="form-section-sub">OSCA registration details.</div>
             <div class="form-grid">
                 <div>
                     <label class="form-label" for="osca_id">OSCA ID</label>
                     <input type="text" name="osca_id" id="osca_id" class="form-control" value="{{ old('osca_id', $senior->osca_id) }}" required>
+                    @error('osca_id')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
                 <div>
                     <label class="form-label" for="name">Full name</label>
                     <input type="text" name="name" id="name" class="form-control" value="{{ old('name', $senior->name) }}" required>
+                    @error('name')<div class="form-error">{{ $message }}</div>@enderror
+                </div>
+                <div class="span-2">
+                    <label class="form-label" for="status">Record status</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="active" {{ old('status', strtolower($senior->status ?? 'active')) === 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="inactive" {{ old('status', strtolower($senior->status ?? '')) === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        <option value="deceased" {{ old('status', strtolower($senior->status ?? '')) === 'deceased' ? 'selected' : '' }}>Deceased</option>
+                    </select>
+                    @error('status')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
             </div>
         </div>
 
         <div class="form-section">
             <div class="form-section-title">Personal details</div>
+            <div class="form-section-sub">Age, sex and contact information.</div>
             <div class="form-grid">
                 <div>
                     <label class="form-label" for="age">Age</label>
                     <input type="number" name="age" id="age" class="form-control" min="60" value="{{ old('age', $senior->age) }}" required>
+                    @error('age')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
                 <div>
                     <label class="form-label" for="birthdate">Birthdate</label>
                     <input type="date" name="birthdate" id="birthdate" class="form-control" value="{{ old('birthdate', $senior->birthdate) }}">
+                    @error('birthdate')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
                 <div>
                     <label class="form-label" for="sex">Sex</label>
@@ -45,20 +60,24 @@
                         <option value="male" {{ $senior->sex == 'male' ? 'selected' : '' }}>Male</option>
                         <option value="female" {{ $senior->sex == 'female' ? 'selected' : '' }}>Female</option>
                     </select>
+                    @error('sex')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
                 <div>
                     <label class="form-label" for="contact_number">Contact number</label>
                     <input type="text" name="contact_number" id="contact_number" class="form-control" value="{{ old('contact_number', $senior->contact_number) }}">
+                    @error('contact_number')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
             </div>
         </div>
 
         <div class="form-section">
             <div class="form-section-title">Address</div>
+            <div class="form-section-sub">Where this senior resides.</div>
             <div class="form-grid">
                 <div class="span-2">
                     <label class="form-label" for="address">Street address</label>
                     <input type="text" name="address" id="address" class="form-control" value="{{ old('address', $senior->address) }}" required>
+                    @error('address')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
                 <div class="span-2">
                     <label class="form-label" for="barangay_id">Barangay</label>
@@ -70,13 +89,18 @@
                             </option>
                         @endforeach
                     </select>
+                    @error('barangay_id')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
             </div>
         </div>
 
         <div class="form-footer">
-            <a href="{{ route('seniors.index') }}" class="btn btn-secondary">Cancel</a>
-            <button type="submit" class="btn btn-primary">Save changes</button>
+            <a href="{{ route('seniors.index') }}" class="btn btn-secondary">
+                <i class="bi bi-x-lg me-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check2 me-1"></i> Save changes
+            </button>
         </div>
     </div>
 </form>

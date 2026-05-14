@@ -27,6 +27,15 @@
                     <input type="text" name="name" id="name" class="form-control" value="{{ old('name') }}" required>
                     @error('name')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
+                <div class="span-2">
+                    <label class="form-label" for="status">Record status</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="active" {{ old('status', 'active') === 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        <option value="deceased" {{ old('status') === 'deceased' ? 'selected' : '' }}>Deceased</option>
+                    </select>
+                    @error('status')<div class="form-error">{{ $message }}</div>@enderror
+                </div>
             </div>
         </div>
 
@@ -37,10 +46,12 @@
                 <div>
                     <label class="form-label" for="age">Age</label>
                     <input type="number" name="age" id="age" class="form-control" min="60" value="{{ old('age') }}" required>
+                    @error('age')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
                 <div>
                     <label class="form-label" for="birthdate">Birthdate</label>
                     <input type="date" name="birthdate" id="birthdate" class="form-control" value="{{ old('birthdate') }}">
+                    @error('birthdate')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
                 <div>
                     <label class="form-label" for="sex">Sex</label>
@@ -49,10 +60,12 @@
                         <option value="male" {{ old('sex') === 'male' ? 'selected' : '' }}>Male</option>
                         <option value="female" {{ old('sex') === 'female' ? 'selected' : '' }}>Female</option>
                     </select>
+                    @error('sex')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
                 <div>
                     <label class="form-label" for="contact_number">Contact number</label>
                     <input type="text" name="contact_number" id="contact_number" class="form-control" value="{{ old('contact_number') }}" placeholder="09xx xxx xxxx">
+                    @error('contact_number')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
             </div>
         </div>
@@ -64,6 +77,7 @@
                 <div class="span-2">
                     <label class="form-label" for="address">Street address</label>
                     <input type="text" name="address" id="address" class="form-control" value="{{ old('address') }}" required>
+                    @error('address')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
                 <div class="span-2">
                     <label class="form-label" for="barangay_id">Barangay</label>
@@ -75,13 +89,18 @@
                             </option>
                         @endforeach
                     </select>
+                    @error('barangay_id')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
             </div>
         </div>
 
         <div class="form-footer">
-            <a href="{{ route('seniors.index') }}" class="btn btn-secondary">Cancel</a>
-            <button type="submit" class="btn btn-primary">Save senior</button>
+            <a href="{{ route('seniors.index') }}" class="btn btn-secondary">
+                <i class="bi bi-x-lg me-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check2 me-1"></i> Save senior
+            </button>
         </div>
     </div>
 </form>

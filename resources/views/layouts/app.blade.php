@@ -616,6 +616,10 @@
 
         /* ---------- Pagination ---------- */
         .pagination { font-size: .82rem; }
+        .pagination svg {
+            width: 1rem;
+            height: 1rem;
+        }
         .page-link {
             color: var(--c-ink-2);
             border-color: var(--c-line);

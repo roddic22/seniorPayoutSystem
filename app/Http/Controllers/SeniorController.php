@@ -8,10 +8,48 @@ use Illuminate\Http\Request;
 
 class SeniorController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $seniors = Senior::with('barangay')->latest()->paginate(10);
-        return view('seniors.index', compact('seniors'));
+        $selectedBarangayId = $request->integer('barangay_id') ?: null;
+        $search = trim((string) $request->query('search', ''));
+        $selectedBarangay = $selectedBarangayId
+            ? Barangay::find($selectedBarangayId)
+            : null;
+
+        $barangays = Barangay::withCount('seniors')
+            ->orderBy('name')
+            ->get();
+
+        $seniorStats = [
+            'total' => Senior::count(),
+            'active' => Senior::whereIn('status', ['active', 'Active'])->count(),
+            'inactive' => Senior::whereIn('status', ['inactive', 'Inactive'])->count(),
+            'deceased' => Senior::whereIn('status', ['deceased', 'Deceased'])->count(),
+        ];
+
+        $seniors = null;
+
+        if ($selectedBarangay || $search !== '') {
+            $seniors = Senior::with('barangay')
+                ->when($selectedBarangay, function ($query) use ($selectedBarangay) {
+                    $query->where('barangay_id', $selectedBarangay->id);
+                })
+                ->when($search !== '', function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%');
+                })
+                ->latest()
+                ->paginate(10)
+                ->withQueryString();
+        }
+
+        return view('seniors.index', compact(
+            'seniors',
+            'seniorStats',
+            'barangays',
+            'selectedBarangay',
+            'selectedBarangayId',
+            'search'
+        ));
     }
 
     public function create()
@@ -31,6 +69,7 @@ class SeniorController extends Controller
             'sex'        => 'nullable|in:male,female',
             'contact_number' => 'nullable|string|max:20',
             'barangay_id'    => 'nullable|exists:barangays,id',
+            'status'     => 'nullable|in:active,inactive,deceased',
         ]);
 
         Senior::create($request->all());
@@ -59,6 +98,7 @@ class SeniorController extends Controller
             'sex'        => 'nullable|in:male,female',
             'contact_number' => 'nullable|string|max:20',
             'barangay_id'    => 'nullable|exists:barangays,id',
+            'status'     => 'nullable|in:active,inactive,deceased',
         ]);
 
         $senior->update($request->all());
