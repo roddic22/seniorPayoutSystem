@@ -87,6 +87,8 @@ class PayoutTransactionController extends Controller
 
     public function edit(PayoutTransaction $payoutTransaction)
     {
+        $this->denyStaffTransactionEditing();
+
         $seniors   = Senior::where('status', 'active')->get();
         $cycles    = PayoutCycle::where('status', 'active')->get();
         $schedules = PayoutSchedule::with('barangay')->get();
@@ -98,6 +100,8 @@ class PayoutTransactionController extends Controller
 
     public function update(Request $request, PayoutTransaction $payoutTransaction)
     {
+        $this->denyStaffTransactionEditing();
+
         $request->validate([
             'cycle_id'    => 'required|exists:payout_cycles,id',
             'senior_id'   => 'required|exists:seniors,id',
@@ -131,6 +135,8 @@ class PayoutTransactionController extends Controller
 
     public function destroy(PayoutTransaction $payoutTransaction)
     {
+        $this->denyStaffTransactionEditing();
+
         $payoutTransaction->delete();
         return redirect()->route('payout-transactions.index')
             ->with('success', 'Transaction deleted.');
@@ -138,6 +144,8 @@ class PayoutTransactionController extends Controller
 
     public function updateStatus(Request $request, PayoutTransaction $payoutTransaction)
 {
+    $this->denyStaffTransactionEditing();
+
     $request->validate([
         'claim_status' => 'required|in:claimed,unclaimed,cancelled',
     ]);
@@ -165,4 +173,11 @@ class PayoutTransactionController extends Controller
         return redirect()->back()->withErrors(['error' => 'Update failed: ' . $e->getMessage()]);
     }
 }
+
+    private function denyStaffTransactionEditing(): void
+    {
+        if (auth()->user()?->role === 'staff') {
+            abort(403, 'Staff accounts cannot edit payout transactions.');
+        }
+    }
 }

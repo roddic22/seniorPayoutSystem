@@ -12,9 +12,11 @@
         <a href="{{ route('payout-transactions.index') }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left me-1"></i> Back
         </a>
-        <a href="{{ route('payout-transactions.edit', $payoutTransaction) }}" class="btn btn-primary">
-            <i class="bi bi-pencil me-1"></i> Edit
-        </a>
+        @if(auth()->user()?->role !== 'staff')
+            <a href="{{ route('payout-transactions.edit', $payoutTransaction) }}" class="btn btn-primary">
+                <i class="bi bi-pencil me-1"></i> Edit
+            </a>
+        @endif
     </div>
 </div>
 
@@ -52,25 +54,27 @@
     </div>
 </div>
 
-<div class="surface mb-3">
-    <div class="surface-head">
-        <h5>Update claim status</h5>
+@if(auth()->user()?->role !== 'staff')
+    <div class="surface mb-3">
+        <div class="surface-head">
+            <h5>Update claim status</h5>
+        </div>
+        <div class="surface-body">
+            <form action="{{ route('payout-transactions.updateStatus', $payoutTransaction) }}" method="POST" class="d-flex flex-wrap align-items-end gap-2">
+                @csrf @method('PATCH')
+                <div style="min-width: 220px;">
+                    <label class="form-label" for="claim_status">Claim status</label>
+                    <select name="claim_status" id="claim_status" class="form-select">
+                        <option value="unclaimed" {{ $payoutTransaction->claim_status == 'unclaimed' ? 'selected' : '' }}>Unclaimed</option>
+                        <option value="claimed"   {{ $payoutTransaction->claim_status == 'claimed'   ? 'selected' : '' }}>Claimed</option>
+                        <option value="cancelled" {{ $payoutTransaction->claim_status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Update status</button>
+            </form>
+        </div>
     </div>
-    <div class="surface-body">
-        <form action="{{ route('payout-transactions.updateStatus', $payoutTransaction) }}" method="POST" class="d-flex flex-wrap align-items-end gap-2">
-            @csrf @method('PATCH')
-            <div style="min-width: 220px;">
-                <label class="form-label" for="claim_status">Claim status</label>
-                <select name="claim_status" id="claim_status" class="form-select">
-                    <option value="unclaimed" {{ $payoutTransaction->claim_status == 'unclaimed' ? 'selected' : '' }}>Unclaimed</option>
-                    <option value="claimed"   {{ $payoutTransaction->claim_status == 'claimed'   ? 'selected' : '' }}>Claimed</option>
-                    <option value="cancelled" {{ $payoutTransaction->claim_status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Update status</button>
-        </form>
-    </div>
-</div>
+@endif
 
 @if($payoutTransaction->submissions->count())
 <div class="surface">

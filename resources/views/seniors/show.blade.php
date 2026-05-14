@@ -23,10 +23,12 @@
         <h5>Profile</h5>
         @if($senior->status === 'active' || $senior->status === 'Active')
             <span class="pill pill-success">Active</span>
+        @elseif($senior->status === 'inactive' || $senior->status === 'Inactive')
+            <span class="pill pill-muted">Inactive</span>
         @elseif($senior->status === 'deceased' || $senior->status === 'Deceased')
             <span class="pill pill-danger">Deceased</span>
         @else
-            <span class="pill pill-muted">{{ ucfirst($senior->status ?? '—') }}</span>
+            <span class="pill pill-muted">{{ ucfirst($senior->status ?? '-') }}</span>
         @endif
     </div>
     <div class="surface-body">
@@ -34,11 +36,11 @@
             <dt>OSCA ID</dt><dd>{{ $senior->osca_id }}</dd>
             <dt>Full name</dt><dd>{{ $senior->name }}</dd>
             <dt>Age</dt><dd>{{ $senior->age }}</dd>
-            <dt>Birthdate</dt><dd>{{ $senior->birthdate ?? '—' }}</dd>
-            <dt>Sex</dt><dd>{{ $senior->sex ? ucfirst($senior->sex) : '—' }}</dd>
-            <dt>Contact</dt><dd>{{ $senior->contact_number ?? '—' }}</dd>
+            <dt>Birthdate</dt><dd>{{ $senior->birthdate ?? '-' }}</dd>
+            <dt>Sex</dt><dd>{{ $senior->sex ? ucfirst($senior->sex) : '-' }}</dd>
+            <dt>Contact</dt><dd>{{ $senior->contact_number ?? '-' }}</dd>
             <dt>Address</dt><dd>{{ $senior->address }}</dd>
-            <dt>Barangay</dt><dd>{{ $senior->barangay->name ?? '—' }}</dd>
+            <dt>Barangay</dt><dd>{{ $senior->barangay->name ?? '-' }}</dd>
         </dl>
     </div>
 </div>

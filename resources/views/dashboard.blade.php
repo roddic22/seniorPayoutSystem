@@ -4,6 +4,64 @@
 
 @section('content')
 
+@if(auth()->user()?->role === 'staff')
+    <div class="page-head">
+        <div>
+            <div class="page-eyebrow">Staff dashboard</div>
+            <h2 class="page-title">Welcome, {{ auth()->user()->name }}</h2>
+            <div class="page-sub">Your assigned payout counter, schedule, and location.</div>
+        </div>
+    </div>
+
+    @if($staffAssignments->isEmpty())
+        <div class="surface">
+            <div class="empty-state">
+                <i class="bi bi-calendar-x d-block"></i>
+                <h5 class="mb-1">Nothing at the moment</h5>
+                <div>No counter or payout schedule has been assigned to you yet.</div>
+            </div>
+        </div>
+    @else
+        <div class="row g-3">
+            @foreach($staffAssignments as $assignment)
+                <div class="col-lg-6">
+                    <div class="surface h-100">
+                        <div class="surface-head">
+                            <h5><i class="bi bi-person-badge me-2"></i>{{ auth()->user()->name }}</h5>
+                            <span class="pill pill-info">Assigned</span>
+                        </div>
+                        <div class="surface-body">
+                            <dl class="deflist">
+                                <dt>Counter</dt>
+                                <dd>{{ $assignment->counter->counter_number ?? '-' }}</dd>
+
+                                <dt>Scheduled date</dt>
+                                <dd>{{ $assignment->schedule->scheduled_date ?? '-' }}</dd>
+
+                                <dt>Place</dt>
+                                <dd>{{ $assignment->schedule->venue ?? '-' }}</dd>
+
+                                <dt>Barangay</dt>
+                                <dd>{{ $assignment->schedule->barangay->name ?? '-' }}</dd>
+
+                                <dt>Time</dt>
+                                <dd>
+                                    {{ $assignment->schedule->time_start ?? '-' }}
+                                    @if($assignment->schedule?->time_end)
+                                        - {{ $assignment->schedule->time_end }}
+                                    @endif
+                                </dd>
+
+                                <dt>Payout cycle</dt>
+                                <dd>{{ $assignment->schedule->cycle->cycle_name ?? '-' }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
+@else
 {{-- KPI Row --}}
 <div class="row g-3 mb-4">
     <div class="col-md-3 col-6">
@@ -214,4 +272,5 @@
     </div>
 </div>
 
+@endif
 @endsection
