@@ -273,14 +273,28 @@
     <form method="GET" action="{{ route('seniors.index') }}" class="row g-2 align-items-end">
         <div class="col-md-5">
             <label for="search" class="form-label">Search by senior name</label>
-            <input
-                type="search"
-                name="search"
-                id="search"
-                class="form-control"
-                value="{{ $search }}"
-                placeholder="Type any part of a name"
+            <div
+                class="expanding-search {{ $search !== '' ? 'is-open' : '' }}"
+                data-clear-url="{{ $selectedBarangayId ? route('seniors.index', ['barangay_id' => $selectedBarangayId]) : route('seniors.index') }}"
+                data-expanding-search
             >
+                <input
+                    type="search"
+                    name="search"
+                    id="search"
+                    class="expanding-search-input"
+                    value="{{ $search }}"
+                    placeholder="Search"
+                    aria-label="Search by senior name"
+                    data-expanding-search-input
+                >
+                <button type="submit" class="expanding-search-btn" aria-label="Search" data-expanding-search-button>
+                    <i class="bi bi-search"></i>
+                </button>
+                <button type="button" class="expanding-search-close" aria-label="Close search" data-expanding-search-close>
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
         </div>
         <div class="col-md-4">
             <label for="barangay_id" class="form-label">View records by barangay</label>

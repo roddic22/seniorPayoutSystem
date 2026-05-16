@@ -10,15 +10,43 @@ use Illuminate\Http\Request;
 
 class StaffAssignmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = trim((string) $request->query('search', ''));
+
         $assignments = StaffAssignment::with([
             'schedule.cycle',
             'schedule.barangay',
             'user',
             'counter'
-        ])->latest()->paginate(10);
-        return view('staff-assignments.index', compact('assignments'));
+        ])
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->whereHas('user', function ($query) use ($search) {
+                        $query->where('name', 'like', '%' . $search . '%')
+                            ->orWhere('email', 'like', '%' . $search . '%');
+                    })
+                        ->orWhereHas('schedule.cycle', function ($query) use ($search) {
+                            $query->where('cycle_name', 'like', '%' . $search . '%');
+                        })
+                        ->orWhereHas('schedule.barangay', function ($query) use ($search) {
+                            $query->where('name', 'like', '%' . $search . '%');
+                        })
+                        ->orWhereHas('schedule', function ($query) use ($search) {
+                            $query->where('scheduled_date', 'like', '%' . $search . '%')
+                                ->orWhere('venue', 'like', '%' . $search . '%');
+                        })
+                        ->orWhereHas('counter', function ($query) use ($search) {
+                            $query->where('counter_number', 'like', '%' . $search . '%')
+                                ->orWhere('label', 'like', '%' . $search . '%');
+                        });
+                });
+            })
+            ->oldest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('staff-assignments.index', compact('assignments', 'search'));
     }
 
     public function create()

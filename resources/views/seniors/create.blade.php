@@ -65,8 +65,8 @@
                 </div>
                 <div>
                     <label class="form-label" for="contact_number">Contact Number</label>
-                    <input type="tel" name="contact_number" id="contact_number" class="form-control" value="{{ old('contact_number') }}" placeholder="e.g. 09171234567" pattern="[0-9+\-\s]+" maxlength="20">
-                    <div class="form-hint">Numbers only. Max 20 characters.</div>
+                    <input type="tel" name="contact_number" id="contact_number" class="form-control" value="{{ old('contact_number') }}" placeholder="e.g. 09171234567" pattern="09[0-9]{9}" minlength="11" maxlength="11" inputmode="numeric" required>
+                    <div class="form-hint">Must be exactly 11 digits and start with 09.</div>
                     @error('contact_number')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
             </div>

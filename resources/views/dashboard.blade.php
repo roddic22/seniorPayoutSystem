@@ -1,15 +1,15 @@
 @extends('layouts.app')
 @section('topbar-title', 'Dashboard')
-@section('topbar-sub', 'System overview and analytics')
+@section('topbar-sub', in_array(auth()->user()?->role, ['staff', 'clerk'], true) ? 'My payout assignment profile' : 'System overview and analytics')
 
 @section('content')
 
-@if(auth()->user()?->role === 'staff')
+@if(in_array(auth()->user()?->role, ['staff', 'clerk'], true))
     <div class="page-head">
         <div>
-            <div class="page-eyebrow">Staff dashboard</div>
+            <div class="page-eyebrow">{{ ucfirst(auth()->user()->role) }} dashboard</div>
             <h2 class="page-title">Welcome, {{ auth()->user()->name }}</h2>
-            <div class="page-sub">Your assigned payout counter, schedule, and location.</div>
+            <div class="page-sub">Your assigned counter, barangay, and payout schedule.</div>
         </div>
     </div>
 
@@ -22,43 +22,116 @@
             </div>
         </div>
     @else
-        <div class="row g-3">
-            @foreach($staffAssignments as $assignment)
-                <div class="col-lg-6">
-                    <div class="surface h-100">
-                        <div class="surface-head">
-                            <h5><i class="bi bi-person-badge me-2"></i>{{ auth()->user()->name }}</h5>
-                            <span class="pill pill-info">Assigned</span>
+        <div class="row g-3 mb-4">
+            <div class="col-lg-4">
+                <div class="surface h-100">
+                    <div class="surface-head">
+                        <h5><i class="bi bi-person-badge me-2"></i>Profile</h5>
+                        <span class="pill pill-info">{{ ucfirst(auth()->user()->role) }}</span>
+                    </div>
+                    <div class="surface-body">
+                        <dl class="deflist">
+                            <dt>Name</dt><dd>{{ auth()->user()->name }}</dd>
+                            <dt>Email</dt><dd>{{ auth()->user()->email }}</dd>
+                            <dt>Total assignments</dt><dd>{{ $staffAssignments->count() }}</dd>
+                            <dt>Upcoming</dt><dd>{{ $upcomingAssignmentCount }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="surface h-100">
+                    <div class="surface-head">
+                        <h5><i class="bi bi-calendar-check me-2"></i>Current / Next Assignment</h5>
+                        <span class="pill pill-success">Assigned</span>
+                    </div>
+                    <div class="surface-body">
+                        <div class="row g-3">
+                            <div class="col-md-3 col-6">
+                                <div class="kpi mb-0">
+                                    <div class="kpi-label">Counter</div>
+                                    <div class="kpi-value">{{ $nextAssignment->counter->counter_number ?? '-' }}</div>
+                                    <div class="kpi-icon"><i class="bi bi-window-stack"></i></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="kpi mb-0">
+                                    <div class="kpi-label">Barangay</div>
+                                    <div class="kpi-value" style="font-size:1rem">{{ $nextAssignment->schedule->barangay->name ?? '-' }}</div>
+                                    <div class="kpi-icon"><i class="bi bi-geo-alt"></i></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="kpi mb-0">
+                                    <div class="kpi-label">Schedule Date</div>
+                                    <div class="kpi-value" style="font-size:1rem">{{ $nextAssignment->schedule->scheduled_date ?? '-' }}</div>
+                                    <div class="kpi-icon"><i class="bi bi-calendar3"></i></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="kpi mb-0">
+                                    <div class="kpi-label">Time</div>
+                                    <div class="kpi-value" style="font-size:1rem">
+                                        {{ $nextAssignment->schedule->time_start ?? '-' }}
+                                        @if($nextAssignment->schedule?->time_end)
+                                            - {{ $nextAssignment->schedule->time_end }}
+                                        @endif
+                                    </div>
+                                    <div class="kpi-icon"><i class="bi bi-clock"></i></div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="surface-body">
-                            <dl class="deflist">
-                                <dt>Counter</dt>
-                                <dd>{{ $assignment->counter->counter_number ?? '-' }}</dd>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                                <dt>Scheduled date</dt>
-                                <dd>{{ $assignment->schedule->scheduled_date ?? '-' }}</dd>
-
-                                <dt>Place</dt>
-                                <dd>{{ $assignment->schedule->venue ?? '-' }}</dd>
-
-                                <dt>Barangay</dt>
-                                <dd>{{ $assignment->schedule->barangay->name ?? '-' }}</dd>
-
-                                <dt>Time</dt>
-                                <dd>
+        <div class="surface">
+            <div class="surface-head">
+                <h5><i class="bi bi-list-check me-2"></i>My Assignment Schedule</h5>
+                <span class="text-muted" style="font-size:.75rem">{{ $staffAssignments->count() }} total</span>
+            </div>
+            <div class="surface-body p-0">
+                <div class="table-wrap" style="border-radius:0;border:0;box-shadow:none">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Cycle</th>
+                                <th>Barangay</th>
+                                <th>Schedule Date</th>
+                                <th>Time</th>
+                                <th>Counter</th>
+                                <th>Venue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($staffAssignments as $assignment)
+                            <tr>
+                                <td>{{ $assignment->schedule->cycle->cycle_name ?? '-' }}</td>
+                                <td class="fw-semibold">{{ $assignment->schedule->barangay->name ?? '-' }}</td>
+                                <td>{{ $assignment->schedule->scheduled_date ?? '-' }}</td>
+                                <td>
                                     {{ $assignment->schedule->time_start ?? '-' }}
                                     @if($assignment->schedule?->time_end)
                                         - {{ $assignment->schedule->time_end }}
                                     @endif
-                                </dd>
-
-                                <dt>Payout cycle</dt>
-                                <dd>{{ $assignment->schedule->cycle->cycle_name ?? '-' }}</dd>
-                            </dl>
-                        </div>
-                    </div>
+                                </td>
+                                <td>
+                                    <span class="pill pill-info">
+                                        {{ $assignment->counter->counter_number ?? '-' }}
+                                    </span>
+                                    @if($assignment->counter?->label)
+                                        <span class="text-muted ms-1">{{ $assignment->counter->label }}</span>
+                                    @endif
+                                </td>
+                                <td>{{ $assignment->schedule->venue ?? '-' }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            @endforeach
+            </div>
         </div>
     @endif
 @else

@@ -13,7 +13,7 @@
         <a href="{{ route('payout-transactions.index') }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left me-1"></i> Back
         </a>
-        @if(auth()->user()?->role !== 'staff')
+        @if(auth()->user()?->role === 'admin')
             <a href="{{ route('payout-transactions.edit', $payoutTransaction) }}" class="btn btn-primary">
                 <i class="bi bi-pencil me-1"></i> Edit
             </a>
@@ -37,6 +37,7 @@
             <div class="col-md-6">
                 <dl class="deflist">
                     <dt>Senior</dt><dd>{{ $payoutTransaction->senior->name ?? '—' }}</dd>
+                    <dt>Barangay</dt><dd>{{ $payoutTransaction->senior->barangay->name ?? '—' }}</dd>
                     <dt>OSCA ID</dt><dd>{{ $payoutTransaction->senior->osca_id ?? '—' }}</dd>
                     <dt>Cycle</dt><dd>{{ $payoutTransaction->cycle->cycle_name ?? '—' }}</dd>
                     <dt>Schedule</dt><dd>{{ $payoutTransaction->schedule->scheduled_date ?? '—' }}</dd>
@@ -137,3 +138,4 @@
         </table>
     </div>
 </div>
+@endsection

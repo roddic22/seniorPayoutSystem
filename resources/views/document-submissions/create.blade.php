@@ -1,6 +1,11 @@
 @extends('layouts.app')
 @section('topbar-title', 'Add Document Submission')
 @section('content')
+@php
+    $backUrl = $selectedSr
+        ? route('seniors.show', $selectedSr)
+        : ($selectedTx ? route('payout-transactions.show', $selectedTx) : route('seniors.index'));
+@endphp
 
 <div class="page-head">
     <div>
@@ -8,7 +13,9 @@
         <h2 class="page-title">Record document submission</h2>
     </div>
     <div class="page-actions">
-        <a href="{{ url()->previous() }}" class="btn btn-secondary">Cancel</a>
+        <a href="{{ $backUrl }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
     </div>
 </div>
 
@@ -19,6 +26,9 @@
 <div class="surface" style="max-width:560px">
     <form action="{{ route('document-submissions.store') }}" method="POST">
         @csrf
+        @if($selectedSr)
+            <input type="hidden" name="source_senior_id" value="{{ $selectedSr }}">
+        @endif
         <div class="form-section">
             <div class="mb-3">
                 <label class="form-label">Transaction</label>
@@ -45,9 +55,10 @@
                 @error('requirement_id')<div class="form-error">{{ $message }}</div>@enderror
             </div>
             <div class="mb-3 form-check">
-                <input type="checkbox" name="is_submitted"
+                <input type="checkbox" name="is_submitted" value="1"
                     class="form-check-input" id="is_submitted" checked>
                 <label class="form-check-label" for="is_submitted">Document was submitted</label>
+                @error('is_submitted')<div class="form-error">{{ $message }}</div>@enderror
             </div>
             <div class="mb-3">
                 <label class="form-label">Notes <span class="text-muted">(optional)</span></label>
@@ -56,7 +67,7 @@
             </div>
         </div>
         <div class="form-footer">
-            <a href="{{ url()->previous() }}" class="btn btn-secondary">Cancel</a>
+            <a href="{{ $backUrl }}" class="btn btn-secondary">Cancel</a>
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-check-lg me-1"></i> Save Submission
             </button>

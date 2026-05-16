@@ -41,10 +41,36 @@
             <dt>Contact</dt><dd>{{ $senior->contact_number ?? '-' }}</dd>
             <dt>Address</dt><dd>{{ $senior->address }}</dd>
             <dt>Barangay</dt><dd>{{ $senior->barangay->name ?? '-' }}</dd>
+            <dt>Documents submitted</dt>
+            <dd>
+                @if($submittedDocuments->count())
+                    <span class="pill pill-success">{{ $submittedDocuments->count() }} submitted</span>
+                @else
+                    <span class="pill pill-muted">None submitted</span>
+                @endif
+            </dd>
+            <dt>Missing documents</dt>
+            <dd>
+                @if($missingDocuments->count())
+                    <span class="pill pill-danger">{{ $missingDocuments->count() }} missing</span>
+                @else
+                    <span class="pill pill-success">None recorded</span>
+                @endif
+            </dd>
+            <dt>Latest document</dt>
+            <dd>
+                @if($latestDocumentSubmission)
+                    {{ $latestDocumentSubmission->requirement->document_name ?? '-' }}
+                    <span class="text-muted">
+                        ({{ optional($latestDocumentSubmission->updated_at)->format('M d, Y') }})
+                    </span>
+                @else
+                    -
+                @endif
+            </dd>
         </dl>
     </div>
 </div>
-@endsection
 
 <div class="surface mt-3">
     <div class="surface-head">
@@ -70,7 +96,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($senior->transactions->flatMap->submissions as $sub)
+                @forelse($documentSubmissions as $sub)
                 <tr>
                     <td>{{ $sub->transaction->cycle->cycle_name ?? '—' }}</td>
                     <td>{{ $sub->requirement->document_name ?? '—' }}</td>
@@ -92,9 +118,14 @@
                     @endif
                 </tr>
                 @empty
-                <tr><td colspan="5" class="table-empty">No document submissions yet.</td></tr>
+                <tr>
+                    <td colspan="{{ auth()->user()->role !== 'staff' ? 5 : 4 }}" class="table-empty">
+                        No document submissions yet.
+                    </td>
+                </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 </div>
+@endsection

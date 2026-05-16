@@ -10,7 +10,7 @@ class DocumentRequirementController extends Controller
 {
     public function index()
     {
-        $requirements = DocumentRequirement::with('cycle')->latest()->paginate(10);
+        $requirements = DocumentRequirement::with('cycle')->oldest()->paginate(10);
         return view('document-requirements.index', compact('requirements'));
     }
 

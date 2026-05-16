@@ -37,7 +37,7 @@ class SeniorController extends Controller
                 ->when($search !== '', function ($query) use ($search) {
                     $query->where('name', 'like', '%' . $search . '%');
                 })
-                ->latest()
+                ->oldest()
                 ->paginate(10)
                 ->withQueryString();
         }
@@ -67,7 +67,7 @@ class SeniorController extends Controller
     'age'            => 'required|integer|min:60|max:120',
     'birthdate'      => 'nullable|date|before:today',
     'sex'            => 'nullable|in:male,female',
-    'contact_number' => 'nullable|string|max:20|regex:/^[0-9+\-\s]+$/',
+    'contact_number' => 'required|string|size:11|regex:/^09[0-9]{9}$/',
     'barangay_id'    => 'nullable|exists:barangays,id',
     'status'         => 'required|in:active,inactive,deceased',
 ]);
@@ -81,9 +81,25 @@ class SeniorController extends Controller
     $senior->load([
         'barangay',
         'transactions.cycle',
+        'transactions.submissions.transaction.cycle',
         'transactions.submissions.requirement',
     ]);
-    return view('seniors.show', compact('senior'));
+
+    $documentSubmissions = $senior->transactions
+        ->flatMap->submissions
+        ->sortByDesc('updated_at')
+        ->values();
+    $submittedDocuments = $documentSubmissions->where('is_submitted', true);
+    $missingDocuments = $documentSubmissions->where('is_submitted', false);
+    $latestDocumentSubmission = $submittedDocuments->first();
+
+    return view('seniors.show', compact(
+        'senior',
+        'documentSubmissions',
+        'submittedDocuments',
+        'missingDocuments',
+        'latestDocumentSubmission'
+    ));
 }
 
     public function edit(Senior $senior)
@@ -101,7 +117,7 @@ class SeniorController extends Controller
     'age'            => 'required|integer|min:60|max:120',
     'birthdate'      => 'nullable|date|before:today',
     'sex'            => 'nullable|in:male,female',
-    'contact_number' => 'nullable|string|max:20|regex:/^[0-9+\-\s]+$/',
+    'contact_number' => 'required|string|size:11|regex:/^09[0-9]{9}$/',
     'barangay_id'    => 'nullable|exists:barangays,id',
     'status'         => 'required|in:active,inactive,deceased',
 ]);

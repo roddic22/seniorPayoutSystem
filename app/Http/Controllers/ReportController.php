@@ -12,8 +12,8 @@ class ReportController extends Controller
 {
     public function index()
     {
-        $cycles  = PayoutCycle::latest()->get();
-        $reports = Report::with(['cycle', 'generator'])->latest()->paginate(10);
+        $cycles  = PayoutCycle::oldest()->get();
+        $reports = Report::with(['cycle', 'generator'])->oldest()->paginate(10);
         return view('reports.index', compact('cycles', 'reports'));
     }
 

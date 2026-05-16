@@ -9,7 +9,7 @@ class CounterController extends Controller
 {
     public function index()
     {
-        $counters = Counter::latest()->paginate(10);
+        $counters = Counter::oldest()->paginate(10);
         return view('counters.index', compact('counters'));
     }
 

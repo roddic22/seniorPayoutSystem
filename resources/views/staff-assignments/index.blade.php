@@ -9,6 +9,29 @@
         <div class="page-sub">Counter assignments per payout schedule.</div>
     </div>
     <div class="page-actions">
+        <form
+            method="GET"
+            action="{{ route('staff-assignments.index') }}"
+            class="expanding-search {{ $search !== '' ? 'is-open' : '' }}"
+            data-clear-url="{{ route('staff-assignments.index') }}"
+            data-expanding-search
+        >
+            <input
+                type="search"
+                name="search"
+                class="expanding-search-input"
+                value="{{ $search }}"
+                placeholder="Search"
+                aria-label="Search staff assignments"
+                data-expanding-search-input
+            >
+            <button type="submit" class="expanding-search-btn" aria-label="Search" data-expanding-search-button>
+                <i class="bi bi-search"></i>
+            </button>
+            <button type="button" class="expanding-search-close" aria-label="Close search" data-expanding-search-close>
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </form>
         @if(auth()->user()->role === 'admin')
         <a href="{{ route('staff-assignments.create') }}" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i> Assign staff
@@ -52,7 +75,11 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="6" class="table-empty">No staff assignments yet.</td></tr>
+                <tr>
+                    <td colspan="6" class="table-empty">
+                        {{ $search !== '' ? 'No staff assignments match your search.' : 'No staff assignments yet.' }}
+                    </td>
+                </tr>
             @endforelse
         </tbody>
     </table>

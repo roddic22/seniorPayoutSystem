@@ -10,7 +10,7 @@ class StaffController extends Controller
 {
     public function index()
     {
-        $staff = User::latest()->paginate(10);
+        $staff = User::oldest()->paginate(10);
         return view('staff.index', compact('staff'));
     }
 
@@ -43,7 +43,7 @@ class StaffController extends Controller
     {
         $assignments = $staff->staffAssignments()
             ->with(['schedule.cycle', 'schedule.barangay', 'counter'])
-            ->latest()->get();
+            ->oldest()->get();
         return view('staff.show', compact('staff', 'assignments'));
     }
 

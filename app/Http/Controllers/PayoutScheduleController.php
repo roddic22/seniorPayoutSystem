@@ -11,7 +11,7 @@ class PayoutScheduleController extends Controller
 {
     public function index()
     {
-        $schedules = PayoutSchedule::with(['cycle', 'barangay'])->latest()->paginate(10);
+        $schedules = PayoutSchedule::with(['cycle', 'barangay'])->oldest()->paginate(10);
         return view('payout-schedules.index', compact('schedules'));
     }
 

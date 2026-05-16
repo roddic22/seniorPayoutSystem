@@ -40,10 +40,11 @@
                 </select>
             </div>
             <div class="mb-3 form-check">
-                <input type="checkbox" name="is_submitted"
+                <input type="checkbox" name="is_submitted" value="1"
                     class="form-check-input" id="is_submitted"
                     {{ $documentSubmission->is_submitted ? 'checked' : '' }}>
                 <label class="form-check-label" for="is_submitted">Document was submitted</label>
+                @error('is_submitted')<div class="form-error">{{ $message }}</div>@enderror
             </div>
             <div class="mb-3">
                 <label class="form-label">Notes</label>

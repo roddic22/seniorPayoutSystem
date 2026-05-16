@@ -13,8 +13,10 @@
             <i class="bi bi-arrow-left me-1"></i> Back
         </a>
         @if(auth()->user()->role === 'admin')
-<a href="{{ route('barangays.edit', $barangay) }}" class="btn btn-warning">Edit</a>
-@endif
+            <a href="{{ route('payout-schedules.edit', $payoutSchedule) }}" class="btn btn-primary">
+                <i class="bi bi-pencil me-1"></i> Edit
+            </a>
+        @endif
     </div>
 </div>
 

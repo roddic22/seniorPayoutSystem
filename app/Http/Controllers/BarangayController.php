@@ -8,7 +8,7 @@ class BarangayController extends Controller
 {
     public function index()
     {
-        $barangays = Barangay::latest()->paginate(10);
+        $barangays = Barangay::oldest()->paginate(10);
         return view('barangays.index', compact('barangays'));
     }
 

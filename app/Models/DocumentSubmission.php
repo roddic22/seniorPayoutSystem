@@ -11,6 +11,10 @@ class DocumentSubmission extends Model
         'is_submitted', 'notes'
     ];
 
+    protected $casts = [
+        'is_submitted' => 'boolean',
+    ];
+
     public function transaction()
     {
         return $this->belongsTo(PayoutTransaction::class, 'transaction_id');

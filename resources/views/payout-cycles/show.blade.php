@@ -12,9 +12,11 @@
         <a href="{{ route('payout-cycles.index') }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left me-1"></i> Back
         </a>
-       @if(auth()->user()->role === 'admin')
-<a href="{{ route('barangays.edit', $barangay) }}" class="btn btn-warning">Edit</a>
-@endif
+        @if(auth()->user()->role === 'admin')
+            <a href="{{ route('payout-cycles.edit', $payoutCycle) }}" class="btn btn-primary">
+                <i class="bi bi-pencil me-1"></i> Edit
+            </a>
+        @endif
     </div>
 </div>
 

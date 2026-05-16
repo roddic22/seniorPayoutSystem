@@ -15,7 +15,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        if (auth()->user()?->role === 'staff') {
+        if (in_array(auth()->user()?->role, ['staff', 'clerk'], true)) {
             $staffAssignments = StaffAssignment::with(['schedule.cycle', 'schedule.barangay', 'counter'])
                 ->where('user_id', auth()->id())
                 ->join('payout_schedules', 'staff_assignments.schedule_id', '=', 'payout_schedules.id')
@@ -24,7 +24,19 @@ class DashboardController extends Controller
                 ->select('staff_assignments.*')
                 ->get();
 
-            return view('dashboard', compact('staffAssignments'));
+            $today = now()->toDateString();
+            $nextAssignment = $staffAssignments
+                ->filter(fn ($assignment) => ($assignment->schedule?->scheduled_date ?? null) >= $today)
+                ->first() ?? $staffAssignments->first();
+            $upcomingAssignmentCount = $staffAssignments
+                ->filter(fn ($assignment) => ($assignment->schedule?->scheduled_date ?? null) >= $today)
+                ->count();
+
+            return view('dashboard', compact(
+                'staffAssignments',
+                'nextAssignment',
+                'upcomingAssignmentCount'
+            ));
         }
 
         // KPI counts

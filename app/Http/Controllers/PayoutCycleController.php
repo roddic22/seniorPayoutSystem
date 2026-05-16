@@ -10,7 +10,7 @@ class PayoutCycleController extends Controller
 {
     public function index()
     {
-        $cycles = PayoutCycle::latest()->paginate(10);
+        $cycles = PayoutCycle::oldest()->paginate(10);
         return view('payout-cycles.index', compact('cycles'));
     }
 

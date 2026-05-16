@@ -13,11 +13,38 @@ use Illuminate\Support\Facades\DB;
 
 class PayoutTransactionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = trim((string) $request->query('search', ''));
+
         $transactions = PayoutTransaction::with([
-    'senior.barangay', 'cycle', 'counter', 'schedule'
-])->latest()->paginate(10);
+            'senior.barangay', 'cycle', 'counter', 'schedule'
+        ])
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('claim_status', 'like', '%' . $search . '%')
+                        ->orWhere('amount', 'like', '%' . $search . '%')
+                        ->orWhereHas('senior', function ($query) use ($search) {
+                            $query->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('osca_id', 'like', '%' . $search . '%');
+                        })
+                        ->orWhereHas('senior.barangay', function ($query) use ($search) {
+                            $query->where('name', 'like', '%' . $search . '%');
+                        })
+                        ->orWhereHas('cycle', function ($query) use ($search) {
+                            $query->where('cycle_name', 'like', '%' . $search . '%');
+                        })
+                        ->orWhereHas('counter', function ($query) use ($search) {
+                            $query->where('counter_number', 'like', '%' . $search . '%')
+                                ->orWhere('label', 'like', '%' . $search . '%');
+                        });
+                });
+            })
+            ->oldest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('payout-transactions.index', compact('transactions', 'search'));
     }
 
     public function create()
@@ -82,9 +109,11 @@ class PayoutTransactionController extends Controller
     public function show(PayoutTransaction $payoutTransaction)
     {
         $payoutTransaction->load([
-    'senior.barangay', 'cycle', 'schedule',
-    'counter', 'processor', 'submissions.requirement'
-]);
+            'senior.barangay', 'cycle', 'schedule',
+            'counter', 'processor', 'submissions.requirement'
+        ]);
+
+        return view('payout-transactions.show', compact('payoutTransaction'));
     }
 
     public function edit(PayoutTransaction $payoutTransaction)
