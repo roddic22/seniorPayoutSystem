@@ -75,6 +75,11 @@
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: .75rem;
         margin-bottom: 1rem;
+        transition: grid-template-columns .24s ease;
+    }
+
+    .barangay-grid.focused {
+        grid-template-columns: minmax(0, 420px);
     }
 
     .barangay-card {
@@ -89,13 +94,18 @@
         color: var(--c-ink);
         text-decoration: none;
         box-shadow: var(--shadow-sm);
-        transition: background .12s ease, border-color .12s ease, transform .06s ease;
+        opacity: 0;
+        transform: translateY(8px);
+        animation: barangayEnter .28s ease forwards;
+        transition: background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease, opacity .18s ease;
     }
 
     .barangay-card:hover {
         background: #f8fafc;
         border-color: #bfdbfe;
         color: var(--c-ink);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
     }
 
     .barangay-card.active {
@@ -105,7 +115,20 @@
     }
 
     .barangay-card:active {
-        transform: translateY(1px);
+        transform: translateY(0);
+    }
+
+    .barangay-card.is-opening {
+        opacity: .55;
+        transform: scale(.98);
+    }
+
+    .barangay-card.active .barangay-card-city::after {
+        content: 'Open barangay';
+        display: block;
+        color: var(--c-primary-600);
+        font-weight: 600;
+        margin-top: .15rem;
     }
 
     .barangay-card-name {
@@ -143,6 +166,7 @@
         gap: 1rem;
         margin-bottom: .75rem;
         flex-wrap: wrap;
+        animation: barangayEnter .28s ease both;
     }
 
     .selected-barangay-title {
@@ -184,14 +208,41 @@
         font-size: .82rem;
     }
 
+    .senior-results-panel {
+        animation: barangayEnter .3s ease both;
+    }
+
+    @keyframes barangayEnter {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .barangay-card,
+        .selected-barangay-head,
+        .senior-results-panel {
+            animation: none;
+            opacity: 1;
+            transform: none;
+        }
+    }
+
     @media (max-width: 991.98px) {
         .senior-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .barangay-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .barangay-grid.focused { grid-template-columns: minmax(0, 1fr); }
     }
 
     @media (max-width: 575.98px) {
         .senior-summary { grid-template-columns: 1fr; }
         .barangay-grid { grid-template-columns: 1fr; }
+        .barangay-grid.focused { grid-template-columns: 1fr; }
     }
 </style>
 @endpush
@@ -201,7 +252,13 @@
     <div>
         <div class="page-eyebrow">Records</div>
         <h2 class="page-title">Senior citizens</h2>
-        <div class="page-sub">Browse registered seniors by barangay to keep the list focused.</div>
+        <div class="page-sub">
+            @if($selectedBarangay)
+                Viewing recorded seniors for {{ $selectedBarangay->name }}.
+            @else
+                Browse registered seniors by barangay to keep the list focused.
+            @endif
+        </div>
     </div>
     <div class="page-actions">
         @if(auth()->user()->role === 'admin')
@@ -270,22 +327,27 @@
     </div>
 </div>
 
-<div class="barangay-grid">
+<div class="barangay-grid {{ $selectedBarangay ? 'focused' : '' }}">
     @forelse($barangays as $barangay)
+        @if(!$selectedBarangay || (string) $selectedBarangayId === (string) $barangay->id)
         <a href="{{ route('seniors.index', ['barangay_id' => $barangay->id]) }}"
-            class="barangay-card {{ (string) $selectedBarangayId === (string) $barangay->id ? 'active' : '' }}">
+            class="barangay-card {{ (string) $selectedBarangayId === (string) $barangay->id ? 'active' : '' }}"
+            data-barangay-card
+            style="animation-delay: {{ $loop->index * 35 }}ms">
             <span>
                 <span class="barangay-card-name">{{ $barangay->name }}</span>
                 <span class="barangay-card-city">{{ $barangay->city ?: 'Barangay records' }}</span>
             </span>
             <span class="barangay-count">{{ $barangay->seniors_count }}</span>
         </a>
+        @endif
     @empty
         <div class="surface surface-pad text-muted">No barangays available yet.</div>
     @endforelse
 </div>
 
 @if($seniors)
+    <div class="senior-results-panel">
     <div class="selected-barangay-head">
         <div>
             <h3 class="selected-barangay-title">
@@ -380,6 +442,7 @@
     <div class="mt-3">
         {{ $seniors->links() }}
     </div>
+    </div>
 @else
     <div class="surface">
         <div class="senior-empty">
@@ -390,3 +453,13 @@
     </div>
 @endif
 @endsection
+
+@push('scripts')
+<script>
+    document.querySelectorAll('[data-barangay-card]').forEach(function (card) {
+        card.addEventListener('click', function () {
+            card.classList.add('is-opening');
+        });
+    });
+</script>
+@endpush

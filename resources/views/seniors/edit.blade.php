@@ -2,6 +2,18 @@
 @section('topbar-title', 'Edit senior')
 @section('content')
 
+@if($errors->any())
+<div class="alert alert-danger mb-3">
+    <i class="bi bi-exclamation-triangle me-1"></i>
+    Please fix the following errors:
+    <ul class="mb-0 mt-1">
+        @foreach($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
+
 <div class="page-head">
     <div>
         <div class="page-eyebrow"><a href="{{ route('seniors.index') }}" class="text-muted text-decoration-none">Seniors</a> / Edit</div>
@@ -28,8 +40,8 @@
                     @error('name')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
                 <div class="span-2">
-                    <label class="form-label" for="status">Record status</label>
-                    <select name="status" id="status" class="form-select">
+                    <label class="form-label" for="status">Status</label>
+                    <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
                         <option value="active" {{ old('status', strtolower($senior->status ?? 'active')) === 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ old('status', strtolower($senior->status ?? '')) === 'inactive' ? 'selected' : '' }}>Inactive</option>
                         <option value="deceased" {{ old('status', strtolower($senior->status ?? '')) === 'deceased' ? 'selected' : '' }}>Deceased</option>

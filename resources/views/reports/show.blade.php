@@ -81,7 +81,7 @@
 <tr>
     <td>{{ $transaction->senior_name ?? '—' }}</td>
     <td>{{ $transaction->osca_id ?? '—' }}</td>
-    <td>₱{{ number_format($transaction->amount, 2) }}</td>
+    <td class="text-end fw-semibold">₱{{ number_format($transaction->amount, 2) }}</td>
     <td>
         @if($transaction->claim_status === 'claimed')
             <span class="badge bg-success">Claimed</span>

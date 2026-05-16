@@ -90,19 +90,31 @@ class SeniorController extends Controller
     public function update(Request $request, Senior $senior)
     {
         $request->validate([
-            'osca_id'    => 'required|unique:seniors,osca_id,' . $senior->id,
-            'name'       => 'required|string|max:255',
-            'address'    => 'required|string',
-            'age'        => 'required|integer|min:60',
-            'birthdate'  => 'nullable|date',
-            'sex'        => 'nullable|in:male,female',
+            'osca_id'        => 'required|string|max:50|unique:seniors,osca_id,' . $senior->id,
+            'name'           => 'required|string|max:255',
+            'address'        => 'required|string|max:500',
+            'age'            => 'required|integer|min:60|max:120',
+            'birthdate'      => 'nullable|date|before:today',
+            'sex'            => 'nullable|in:male,female',
             'contact_number' => 'nullable|string|max:20',
             'barangay_id'    => 'nullable|exists:barangays,id',
-            'status'     => 'nullable|in:active,inactive,deceased',
+            'status'         => 'required|in:active,inactive,deceased',
         ]);
 
-        $senior->update($request->all());
-        return redirect()->route('seniors.index')->with('success', 'Senior citizen updated successfully.');
+        $senior->update([
+            'osca_id'        => $request->osca_id,
+            'name'           => $request->name,
+            'address'        => $request->address,
+            'age'            => $request->age,
+            'birthdate'      => $request->birthdate ?? null,
+            'sex'            => $request->sex ?? null,
+            'contact_number' => $request->contact_number ?? null,
+            'barangay_id'    => $request->barangay_id ?? null,
+            'status'         => $request->status,
+        ]);
+
+        return redirect()->route('seniors.show', $senior)
+            ->with('success', 'Senior record updated successfully.');
     }
 
     public function destroy(Senior $senior)

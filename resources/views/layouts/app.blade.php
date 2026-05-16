@@ -41,6 +41,10 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             min-height: 100vh;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -48,9 +52,31 @@
             color: var(--c-ink);
             font-size: .9rem;
             line-height: 1.5;
+            animation: pageFadeIn .24s ease both;
         }
 
-        a { color: var(--c-primary-600); }
+        a { color: var(--c-primary-600); transition: color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes contentRise {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+            }
+        }
 
         /* ---------- Layout ---------- */
         .app-layout {
@@ -68,6 +94,7 @@
             flex-direction: column;
             z-index: 1040;
             border-right: 1px solid var(--c-line);
+            transition: transform .24s ease, box-shadow .24s ease;
         }
 
         .sidebar-brand {
@@ -205,6 +232,7 @@
         .app-shell {
             padding: 1.5rem 1.75rem 3rem;
             max-width: 1400px;
+            animation: contentRise .28s ease both;
         }
 
         /* ---------- Page header ---------- */
@@ -258,6 +286,7 @@
             border: 1px solid var(--c-line);
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-sm);
+            transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease, background-color .18s ease;
         }
 
         .surface-pad { padding: 1.25rem 1.5rem; }
@@ -281,8 +310,10 @@
             font-weight: 500;
             border-radius: var(--radius);
             padding: .45rem .85rem;
-            transition: all .12s ease;
+            transition: background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
         }
+        .btn:hover { transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
         .btn-sm { font-size: .75rem; padding: .3rem .6rem; }
         .btn-lg { font-size: .9rem; padding: .65rem 1.1rem; }
 
@@ -369,8 +400,9 @@
             border: 1px solid transparent;
             text-decoration: none;
             font-size: .85rem;
-            transition: all .12s ease;
+            transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
         }
+        .row-action:hover { transform: translateY(-1px); }
         .row-action:hover { background: var(--c-line-soft); color: var(--c-ink); }
         .row-action.delete:hover { background: var(--c-danger-bg); color: var(--c-danger); }
         .row-action.edit:hover { background: var(--c-warning-bg); color: var(--c-warning); }
@@ -383,6 +415,7 @@
             border-radius: var(--radius-lg);
             overflow: hidden;
             box-shadow: var(--shadow-sm);
+            animation: contentRise .28s ease both;
         }
 
         .table {
@@ -409,6 +442,7 @@
             white-space: nowrap;
         }
 
+        .table tbody tr { transition: background-color .18s ease; }
         .table tbody tr:hover { background: #fafbfc; }
         .table tbody tr:last-child td { border-bottom: 0; }
 
@@ -486,6 +520,7 @@
             background: var(--c-surface);
             color: var(--c-ink);
             box-shadow: none;
+            transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
         }
 
         .form-control::placeholder { color: #94a3b8; }
