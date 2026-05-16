@@ -12,8 +12,12 @@ class StaffAssignmentController extends Controller
 {
     public function index()
     {
-        $assignments = StaffAssignment::with(['schedule.cycle', 'schedule.barangay', 'user', 'counter'])
-            ->latest()->paginate(10);
+        $assignments = StaffAssignment::with([
+            'schedule.cycle',
+            'schedule.barangay',
+            'user',
+            'counter'
+        ])->latest()->paginate(10);
         return view('staff-assignments.index', compact('assignments'));
     }
 
@@ -21,7 +25,8 @@ class StaffAssignmentController extends Controller
     {
         $schedules = PayoutSchedule::with(['cycle', 'barangay'])->get();
         $counters  = Counter::where('is_active', 1)->get();
-        $users     = User::all();
+        // Exclude admin from staff dropdown
+        $users     = User::whereIn('role', ['staff', 'clerk'])->get();
         return view('staff-assignments.create', compact('schedules', 'counters', 'users'));
     }
 
@@ -33,12 +38,26 @@ class StaffAssignmentController extends Controller
             'counter_id'  => 'required|exists:counters,id',
         ]);
 
-        $exists = StaffAssignment::where('schedule_id', $request->schedule_id)
+        // Check duplicate — same staff on same schedule
+        $duplicateStaff = StaffAssignment::where('schedule_id', $request->schedule_id)
+            ->where('user_id', $request->user_id)
+            ->exists();
+
+        if ($duplicateStaff) {
+            return back()
+                ->withInput()
+                ->with('assignment_error', 'This staff member is already assigned to the selected schedule.');
+        }
+
+        // Check duplicate — same counter on same schedule
+        $duplicateCounter = StaffAssignment::where('schedule_id', $request->schedule_id)
             ->where('counter_id', $request->counter_id)
             ->exists();
 
-        if ($exists) {
-            return back()->withErrors(['counter_id' => 'This counter is already assigned for that schedule.']);
+        if ($duplicateCounter) {
+            return back()
+                ->withInput()
+                ->with('assignment_error', 'This counter is already assigned for the selected schedule.');
         }
 
         StaffAssignment::create($request->all());
@@ -48,7 +67,12 @@ class StaffAssignmentController extends Controller
 
     public function show(StaffAssignment $staffAssignment)
     {
-        $staffAssignment->load(['schedule.cycle', 'schedule.barangay', 'user', 'counter']);
+        $staffAssignment->load([
+            'schedule.cycle',
+            'schedule.barangay',
+            'user',
+            'counter'
+        ]);
         return view('staff-assignments.show', compact('staffAssignment'));
     }
 
@@ -56,8 +80,11 @@ class StaffAssignmentController extends Controller
     {
         $schedules = PayoutSchedule::with(['cycle', 'barangay'])->get();
         $counters  = Counter::where('is_active', 1)->get();
-        $users     = User::all();
-        return view('staff-assignments.edit', compact('staffAssignment', 'schedules', 'counters', 'users'));
+        // Exclude admin from staff dropdown
+        $users     = User::whereIn('role', ['staff', 'clerk'])->get();
+        return view('staff-assignments.edit', compact(
+            'staffAssignment', 'schedules', 'counters', 'users'
+        ));
     }
 
     public function update(Request $request, StaffAssignment $staffAssignment)
@@ -68,16 +95,36 @@ class StaffAssignmentController extends Controller
             'counter_id'  => 'required|exists:counters,id',
         ]);
 
-        $exists = StaffAssignment::where('schedule_id', $request->schedule_id)
+        // Check duplicate staff on same schedule (exclude current record)
+        $duplicateStaff = StaffAssignment::where('schedule_id', $request->schedule_id)
+            ->where('user_id', $request->user_id)
+            ->where('id', '!=', $staffAssignment->id)
+            ->exists();
+
+        if ($duplicateStaff) {
+            return back()
+                ->withInput()
+                ->with('assignment_error', 'This staff member is already assigned to the selected schedule.');
+        }
+
+        // Check duplicate counter on same schedule (exclude current record)
+        $duplicateCounter = StaffAssignment::where('schedule_id', $request->schedule_id)
             ->where('counter_id', $request->counter_id)
             ->where('id', '!=', $staffAssignment->id)
             ->exists();
 
-        if ($exists) {
-            return back()->withErrors(['counter_id' => 'This counter is already assigned for that schedule.']);
+        if ($duplicateCounter) {
+            return back()
+                ->withInput()
+                ->with('assignment_error', 'This counter is already assigned for the selected schedule.');
         }
 
-        $staffAssignment->update($request->all());
+        $staffAssignment->update([
+            'schedule_id' => $request->schedule_id,
+            'user_id'     => $request->user_id,
+            'counter_id'  => $request->counter_id,
+        ]);
+
         return redirect()->route('staff-assignments.index')
             ->with('success', 'Staff assignment updated.');
     }

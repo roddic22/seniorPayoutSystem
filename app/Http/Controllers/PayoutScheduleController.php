@@ -28,8 +28,8 @@ class PayoutScheduleController extends Controller
             'cycle_id'       => 'required|exists:payout_cycles,id',
             'barangay_id'    => 'nullable|exists:barangays,id',
             'scheduled_date' => 'required|date',
-            'time_start'     => 'nullable|date_format:H:i',
-            'time_end'       => 'nullable|date_format:H:i|after:time_start',
+            'time_start' => 'nullable|string|max:10',
+            'time_end'   => 'nullable|string|max:10',
             'venue'          => 'nullable|string|max:200',
         ]);
 
@@ -44,26 +44,35 @@ class PayoutScheduleController extends Controller
     }
 
     public function edit(PayoutSchedule $payoutSchedule)
-    {
-        $cycles    = PayoutCycle::where('status', 'active')->get();
-        $barangays = Barangay::all();
-        return view('payout-schedules.edit', compact('payoutSchedule', 'cycles', 'barangays'));
-    }
+{
+    $cycles    = PayoutCycle::all();
+    $barangays = Barangay::all();
+    return view('payout-schedules.edit', compact('payoutSchedule', 'cycles', 'barangays'));
+}
 
-    public function update(Request $request, PayoutSchedule $payoutSchedule)
-    {
-        $request->validate([
-            'cycle_id'       => 'required|exists:payout_cycles,id',
-            'barangay_id'    => 'nullable|exists:barangays,id',
-            'scheduled_date' => 'required|date',
-            'time_start'     => 'nullable|date_format:H:i',
-            'time_end'       => 'nullable|date_format:H:i|after:time_start',
-            'venue'          => 'nullable|string|max:200',
-        ]);
+   public function update(Request $request, PayoutSchedule $payoutSchedule)
+{
+    $request->validate([
+        'cycle_id'       => 'required|exists:payout_cycles,id',
+        'barangay_id'    => 'nullable|exists:barangays,id',
+        'scheduled_date' => 'required|date',
+        'time_start'     => 'nullable|string|max:10',
+        'time_end'       => 'nullable|string|max:10',
+        'venue'          => 'nullable|string|max:200',
+    ]);
 
-        $payoutSchedule->update($request->all());
-        return redirect()->route('payout-schedules.index')->with('success', 'Schedule updated.');
-    }
+    $payoutSchedule->update([
+        'cycle_id'       => $request->cycle_id,
+        'barangay_id'    => $request->barangay_id,
+        'scheduled_date' => $request->scheduled_date,
+        'time_start'     => $request->time_start,
+        'time_end'       => $request->time_end,
+        'venue'          => $request->venue,
+    ]);
+
+    return redirect()->route('payout-schedules.index')
+        ->with('success', 'Schedule updated successfully.');
+}
 
     public function destroy(PayoutSchedule $payoutSchedule)
     {

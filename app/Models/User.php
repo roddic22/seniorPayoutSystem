@@ -49,8 +49,14 @@ class User extends Authenticatable
         ];
     }
 
-    public function staffAssignments()
-    {
-        return $this->hasMany(StaffAssignment::class);
-    }
+   public function staffAssignments()
+{
+    return $this->hasMany(\App\Models\StaffAssignment::class, 'user_id');
+}
+
+public function payoutTransactions()
+{
+    return $this->hasMany(\App\Models\PayoutTransaction::class, 'processed_by');
+}
+
 }
