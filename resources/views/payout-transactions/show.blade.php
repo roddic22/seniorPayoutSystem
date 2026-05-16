@@ -6,6 +6,7 @@
     <div>
         <div class="page-eyebrow"><a href="{{ route('payout-transactions.index') }}" class="text-muted text-decoration-none">Transactions</a> / Details</div>
         <h2 class="page-title">{{ $payoutTransaction->senior->name ?? 'Transaction' }}</h2>
+        <p><strong>Barangay:</strong>{{ $payoutTransaction->senior->barangay->name ?? '—' }}</p>
         <div class="page-sub">{{ $payoutTransaction->cycle->cycle_name ?? '—' }} · ₱{{ number_format($payoutTransaction->amount, 2) }}</div>
     </div>
     <div class="page-actions">
@@ -76,35 +77,63 @@
     </div>
 @endif
 
-@if($payoutTransaction->submissions->count())
-<div class="surface">
+<div class="surface mt-3">
     <div class="surface-head">
-        <h5>Document submissions</h5>
+        <h5><i class="bi bi-file-earmark-check me-2"></i>Document Submissions</h5>
+        @if(auth()->user()->role !== 'staff')
+        <a href="{{ route('document-submissions.create') }}?transaction_id={{ $payoutTransaction->id }}"
+            class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Add
+        </a>
+        @endif
     </div>
-    <table class="table mb-0">
-        <thead>
-            <tr>
-                <th>Document</th>
-                <th>Submitted</th>
-                <th>Notes</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($payoutTransaction->submissions as $submission)
+    <div class="surface-body p-0">
+        <table class="table">
+            <thead>
                 <tr>
-                    <td class="fw-semibold">{{ $submission->requirement->document_name ?? '—' }}</td>
+                    <th>Document Required</th>
+                    <th>Submitted</th>
+                    <th>Notes</th>
+                    @if(auth()->user()->role !== 'staff')
+                    <th class="text-end">Actions</th>
+                    @endif
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($payoutTransaction->submissions as $sub)
+                <tr>
+                    <td>{{ $sub->requirement->document_name ?? '—' }}</td>
                     <td>
-                        @if($submission->is_submitted)
+                        @if($sub->is_submitted)
                             <span class="pill pill-success">Submitted</span>
                         @else
                             <span class="pill pill-danger">Missing</span>
                         @endif
                     </td>
-                    <td class="text-muted">{{ $submission->notes ?? '—' }}</td>
+                    <td>{{ $sub->notes ?? '—' }}</td>
+                    @if(auth()->user()->role !== 'staff')
+                    <td class="text-end">
+                        <div class="row-actions">
+                            <a href="{{ route('document-submissions.edit', $sub) }}"
+                                class="row-action edit" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form action="{{ route('document-submissions.destroy', $sub) }}"
+                                method="POST" class="d-inline"
+                                onsubmit="return confirm('Remove this submission?')">
+                                @csrf @method('DELETE')
+                                <button class="row-action delete" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                    @endif
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+                @empty
+                <tr><td colspan="4" class="table-empty">No submissions recorded yet.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
-@endif
-@endsection

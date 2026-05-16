@@ -57,7 +57,8 @@
             <div class="form-grid">
                 <div>
                     <label class="form-label" for="age">Age</label>
-                    <input type="number" name="age" id="age" class="form-control" min="60" value="{{ old('age', $senior->age) }}" required>
+                    <input type="number" name="age" id="age" class="form-control" min="60" max="120" value="{{ old('age', $senior->age) }}" placeholder="Minimum age is 60" required>
+                    <div class="form-hint">Must be between 60 and 120.</div>
                     @error('age')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
                 <div>
@@ -75,8 +76,9 @@
                     @error('sex')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
                 <div>
-                    <label class="form-label" for="contact_number">Contact number</label>
-                    <input type="text" name="contact_number" id="contact_number" class="form-control" value="{{ old('contact_number', $senior->contact_number) }}">
+                    <label class="form-label" for="contact_number">Contact Number</label>
+                    <input type="tel" name="contact_number" id="contact_number" class="form-control" value="{{ old('contact_number', $senior->contact_number) }}" placeholder="e.g. 09171234567" pattern="[0-9+\-\s]+" maxlength="20">
+                    <div class="form-hint">Numbers only. Max 20 characters.</div>
                     @error('contact_number')<div class="form-error">{{ $message }}</div>@enderror
                 </div>
             </div>

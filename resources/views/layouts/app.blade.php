@@ -722,11 +722,14 @@
         href="{{ route('seniors.index') }}">
         <i class="bi bi-people"></i> Seniors
     </a>
+    @if(auth()->user()->role !== 'staff')
     <a class="sidebar-link {{ request()->routeIs('barangays.*') ? 'active' : '' }}"
         href="{{ route('barangays.index') }}">
         <i class="bi bi-geo-alt"></i> Barangays
     </a>
+    @endif
 
+    @if(auth()->user()->role !== 'staff')
     <div class="sidebar-heading">Payouts</div>
     <a class="sidebar-link {{ request()->routeIs('payout-cycles.*') ? 'active' : '' }}"
         href="{{ route('payout-cycles.index') }}">
@@ -740,14 +743,14 @@
         href="{{ route('payout-transactions.index') }}">
         <i class="bi bi-receipt"></i> Transactions
     </a>
+    @endif
 
+    @if(auth()->user()->role === 'admin')
     <div class="sidebar-heading">Operations</div>
     <a class="sidebar-link {{ request()->routeIs('document-requirements.*') ? 'active' : '' }}"
         href="{{ route('document-requirements.index') }}">
         <i class="bi bi-file-earmark-check"></i> Requirements
     </a>
-
-    @if(auth()->user()->role === 'admin')
     <a class="sidebar-link {{ request()->routeIs('counters.*') ? 'active' : '' }}"
         href="{{ route('counters.index') }}">
         <i class="bi bi-window-stack"></i> Counters
@@ -762,11 +765,13 @@
     </a>
     @endif
 
+    @if(auth()->user()->role !== 'staff')
     <div class="sidebar-heading">Insights</div>
     <a class="sidebar-link {{ request()->routeIs('reports.*') ? 'active' : '' }}"
         href="{{ route('reports.index') }}">
         <i class="bi bi-bar-chart"></i> Reports
     </a>
+    @endif
 
     @if(auth()->user()->role === 'admin')
     <a class="sidebar-link {{ request()->routeIs('explain.demo') ? 'active' : '' }}"
@@ -775,6 +780,7 @@
     </a>
     @endif
 </nav>
+
     </aside>
 
     <div class="app-main">

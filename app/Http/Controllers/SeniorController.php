@@ -61,25 +61,30 @@ class SeniorController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'osca_id'    => 'required|unique:seniors,osca_id',
-            'name'       => 'required|string|max:255',
-            'address'    => 'required|string',
-            'age'        => 'required|integer|min:60',
-            'birthdate'  => 'nullable|date',
-            'sex'        => 'nullable|in:male,female',
-            'contact_number' => 'nullable|string|max:20',
-            'barangay_id'    => 'nullable|exists:barangays,id',
-            'status'     => 'nullable|in:active,inactive,deceased',
-        ]);
+    'osca_id'        => 'required|string|max:50|unique:seniors,osca_id',
+    'name'           => 'required|string|min:2|max:255',
+    'address'        => 'required|string|max:500',
+    'age'            => 'required|integer|min:60|max:120',
+    'birthdate'      => 'nullable|date|before:today',
+    'sex'            => 'nullable|in:male,female',
+    'contact_number' => 'nullable|string|max:20|regex:/^[0-9+\-\s]+$/',
+    'barangay_id'    => 'nullable|exists:barangays,id',
+    'status'         => 'required|in:active,inactive,deceased',
+]);
 
         Senior::create($request->all());
         return redirect()->route('seniors.index')->with('success', 'Senior citizen registered successfully.');
     }
 
     public function show(Senior $senior)
-    {
-        return view('seniors.show', compact('senior'));
-    }
+{
+    $senior->load([
+        'barangay',
+        'transactions.cycle',
+        'transactions.submissions.requirement',
+    ]);
+    return view('seniors.show', compact('senior'));
+}
 
     public function edit(Senior $senior)
     {
@@ -89,17 +94,17 @@ class SeniorController extends Controller
 
     public function update(Request $request, Senior $senior)
     {
-        $request->validate([
-            'osca_id'        => 'required|string|max:50|unique:seniors,osca_id,' . $senior->id,
-            'name'           => 'required|string|max:255',
-            'address'        => 'required|string|max:500',
-            'age'            => 'required|integer|min:60|max:120',
-            'birthdate'      => 'nullable|date|before:today',
-            'sex'            => 'nullable|in:male,female',
-            'contact_number' => 'nullable|string|max:20',
-            'barangay_id'    => 'nullable|exists:barangays,id',
-            'status'         => 'required|in:active,inactive,deceased',
-        ]);
+       $request->validate([
+    'osca_id'        => 'required|string|max:50|unique:seniors,osca_id,'.$senior->id,
+    'name'           => 'required|string|min:2|max:255',
+    'address'        => 'required|string|max:500',
+    'age'            => 'required|integer|min:60|max:120',
+    'birthdate'      => 'nullable|date|before:today',
+    'sex'            => 'nullable|in:male,female',
+    'contact_number' => 'nullable|string|max:20|regex:/^[0-9+\-\s]+$/',
+    'barangay_id'    => 'nullable|exists:barangays,id',
+    'status'         => 'required|in:active,inactive,deceased',
+]);
 
         $senior->update([
             'osca_id'        => $request->osca_id,

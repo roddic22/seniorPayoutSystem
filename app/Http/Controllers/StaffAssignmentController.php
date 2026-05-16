@@ -26,7 +26,7 @@ class StaffAssignmentController extends Controller
         $schedules = PayoutSchedule::with(['cycle', 'barangay'])->get();
         $counters  = Counter::where('is_active', 1)->get();
         // Exclude admin from staff dropdown
-        $users     = User::whereIn('role', ['staff', 'clerk'])->get();
+        $users = User::where('role', 'clerk')->get();
         return view('staff-assignments.create', compact('schedules', 'counters', 'users'));
     }
 
@@ -81,7 +81,7 @@ class StaffAssignmentController extends Controller
         $schedules = PayoutSchedule::with(['cycle', 'barangay'])->get();
         $counters  = Counter::where('is_active', 1)->get();
         // Exclude admin from staff dropdown
-        $users     = User::whereIn('role', ['staff', 'clerk'])->get();
+        $users = User::where('role', 'clerk')->get();
         return view('staff-assignments.edit', compact(
             'staffAssignment', 'schedules', 'counters', 'users'
         ));

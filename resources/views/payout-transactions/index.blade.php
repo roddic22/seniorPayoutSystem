@@ -20,6 +20,7 @@
         <thead>
             <tr>
                 <th>Senior</th>
+                <th>Barangay</th>
                 <th>Cycle</th>
                 <th>Counter</th>
                 <th class="text-end">Amount</th>
@@ -32,6 +33,7 @@
             @forelse($transactions as $transaction)
                 <tr>
                     <td class="fw-semibold">{{ $transaction->senior->name ?? '—' }}</td>
+                    <td>{{ $transaction->senior->barangay->name ?? '—' }}</td>
                     <td class="text-muted">{{ $transaction->cycle->cycle_name ?? '—' }}</td>
                     <td>{{ $transaction->counter->counter_number ?? '—' }}</td>
                     <td class="text-end fw-semibold">₱{{ number_format($transaction->amount, 2) }}</td>

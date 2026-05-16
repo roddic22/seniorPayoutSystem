@@ -15,9 +15,9 @@ class PayoutTransactionController extends Controller
 {
     public function index()
     {
-        $transactions = PayoutTransaction::with(['senior', 'cycle', 'counter', 'schedule'])
-            ->latest()->paginate(10);
-        return view('payout-transactions.index', compact('transactions'));
+        $transactions = PayoutTransaction::with([
+    'senior.barangay', 'cycle', 'counter', 'schedule'
+])->latest()->paginate(10);
     }
 
     public function create()
@@ -81,8 +81,10 @@ class PayoutTransactionController extends Controller
 
     public function show(PayoutTransaction $payoutTransaction)
     {
-        $payoutTransaction->load(['senior', 'cycle', 'schedule', 'counter', 'processor', 'submissions.requirement']);
-        return view('payout-transactions.show', compact('payoutTransaction'));
+        $payoutTransaction->load([
+    'senior.barangay', 'cycle', 'schedule',
+    'counter', 'processor', 'submissions.requirement'
+]);
     }
 
     public function edit(PayoutTransaction $payoutTransaction)

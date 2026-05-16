@@ -19,21 +19,21 @@ class CounterController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'counter_number' => 'required|string|max:20|unique:counters,counter_number',
-            'label'          => 'nullable|string|max:100',
-            'is_active'      => 'boolean',
-        ]);
+{
+    $request->validate([
+        'counter_number' => 'required|string|max:20|unique:counters,counter_number',
+        'label'          => 'nullable|string|max:100',
+    ]);
 
-        Counter::create([
-            'counter_number' => $request->counter_number,
-            'label'          => $request->label,
-            'is_active'      => $request->has('is_active') ? 1 : 0,
-        ]);
+    Counter::create([
+        'counter_number' => $request->counter_number,
+        'label'          => $request->label,
+        'is_active'      => $request->has('is_active') ? 1 : 0,
+    ]);
 
-        return redirect()->route('counters.index')->with('success', 'Counter added successfully.');
-    }
+    return redirect()->route('counters.index')
+        ->with('success', 'Counter added successfully.');
+}
 
     public function show(Counter $counter)
     {

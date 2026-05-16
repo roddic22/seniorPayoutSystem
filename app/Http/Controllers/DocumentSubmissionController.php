@@ -1,65 +1,100 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Models\DocumentSubmission;
+use App\Models\PayoutTransaction;
+use App\Models\DocumentRequirement;
 use Illuminate\Http\Request;
 
 class DocumentSubmissionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $submissions = DocumentSubmission::with([
+            'transaction.senior', 'requirement'
+        ])->latest()->paginate(10);
+        return view('document-submissions.index', compact('submissions'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $transactions  = PayoutTransaction::with('senior')->latest()->get();
+        $requirements  = DocumentRequirement::all();
+        $selectedTx    = $request->transaction_id;
+        $selectedSr    = $request->senior_id;
+        return view('document-submissions.create', compact(
+            'transactions', 'requirements', 'selectedTx', 'selectedSr'
+        ));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'transaction_id'  => 'required|exists:payout_transactions,id',
+            'requirement_id'  => 'required|exists:document_requirements,id',
+            'is_submitted'    => 'boolean',
+            'notes'           => 'nullable|string|max:255',
+        ]);
+
+        $exists = DocumentSubmission::where('transaction_id', $request->transaction_id)
+            ->where('requirement_id', $request->requirement_id)
+            ->exists();
+
+        if ($exists) {
+            return back()->withInput()
+                ->with('error', 'This document has already been recorded for this transaction.');
+        }
+
+        DocumentSubmission::create([
+            'transaction_id' => $request->transaction_id,
+            'requirement_id' => $request->requirement_id,
+            'is_submitted'   => $request->has('is_submitted') ? 1 : 0,
+            'notes'          => $request->notes,
+        ]);
+
+        return redirect()->route('payout-transactions.show', $request->transaction_id)
+            ->with('success', 'Document submission recorded.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(DocumentSubmission $documentSubmission)
     {
-        //
+        $documentSubmission->load(['transaction.senior', 'requirement']);
+        return view('document-submissions.show', compact('documentSubmission'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(DocumentSubmission $documentSubmission)
     {
-        //
+        $transactions = PayoutTransaction::with('senior')->latest()->get();
+        $requirements = DocumentRequirement::all();
+        return view('document-submissions.edit', compact(
+            'documentSubmission', 'transactions', 'requirements'
+        ));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, DocumentSubmission $documentSubmission)
     {
-        //
+        $request->validate([
+            'transaction_id' => 'required|exists:payout_transactions,id',
+            'requirement_id' => 'required|exists:document_requirements,id',
+            'notes'          => 'nullable|string|max:255',
+        ]);
+
+        $documentSubmission->update([
+            'transaction_id' => $request->transaction_id,
+            'requirement_id' => $request->requirement_id,
+            'is_submitted'   => $request->has('is_submitted') ? 1 : 0,
+            'notes'          => $request->notes,
+        ]);
+
+        return redirect()->route('payout-transactions.show', $documentSubmission->transaction_id)
+            ->with('success', 'Document submission updated.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(DocumentSubmission $documentSubmission)
     {
-        //
+        $txId = $documentSubmission->transaction_id;
+        $documentSubmission->delete();
+        return redirect()->route('payout-transactions.show', $txId)
+            ->with('success', 'Document submission removed.');
     }
 }
