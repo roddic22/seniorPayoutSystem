@@ -10,14 +10,16 @@ use App\Models\Counter;
 use App\Models\PayoutSchedule;
 use App\Models\StaffAssignment;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        if (in_array(auth()->user()?->role, ['staff', 'clerk'], true)) {
+        if (in_array(Auth::user()?->role, ['staff', 'clerk'], true)) {
             $staffAssignments = StaffAssignment::with(['schedule.cycle', 'schedule.barangay', 'counter'])
-                ->where('user_id', auth()->id())
+                ->where('user_id', Auth::id())
                 ->join('payout_schedules', 'staff_assignments.schedule_id', '=', 'payout_schedules.id')
                 ->orderByRaw('payout_schedules.scheduled_date IS NULL')
                 ->orderBy('payout_schedules.scheduled_date')
@@ -26,10 +28,10 @@ class DashboardController extends Controller
 
             $today = now()->toDateString();
             $nextAssignment = $staffAssignments
-                ->filter(fn ($assignment) => ($assignment->schedule?->scheduled_date ?? null) >= $today)
+                ->filter(fn($a) => ($a->schedule?->scheduled_date ?? null) >= $today)
                 ->first() ?? $staffAssignments->first();
             $upcomingAssignmentCount = $staffAssignments
-                ->filter(fn ($assignment) => ($assignment->schedule?->scheduled_date ?? null) >= $today)
+                ->filter(fn($a) => ($a->schedule?->scheduled_date ?? null) >= $today)
                 ->count();
 
             return view('dashboard', compact(
@@ -39,28 +41,37 @@ class DashboardController extends Controller
             ));
         }
 
-        // KPI counts
-        $totalSeniors   = Senior::count();
-        $totalCycles    = PayoutCycle::count();
-        $totalBarangays = Barangay::count();
-        $totalCounters  = Counter::count();
-        $totalClaimed   = PayoutTransaction::where('claim_status', 'claimed')->count();
-        $totalUnclaimed = PayoutTransaction::where('claim_status', 'unclaimed')->count();
-        $totalCancelled = PayoutTransaction::where('claim_status', 'cancelled')->count();
-        $totalAmount    = PayoutTransaction::where('claim_status', 'claimed')->sum('amount');
+        // ── Cached KPI counts (10 min TTL) ──────────────────────────
+        $totalSeniors   = Cache::remember('kpi_seniors',   600, fn() => Senior::count());
+        $totalCycles    = Cache::remember('kpi_cycles',    600, fn() => PayoutCycle::count());
+        $totalBarangays = Cache::remember('kpi_barangays', 600, fn() => Barangay::count());
+        $totalCounters  = Cache::remember('kpi_counters',  600, fn() => Counter::count());
 
-        // Active cycles
-        $activeCycles = PayoutCycle::where('status', 'active')->get();
+        // ── Transaction stats (5 min TTL — changes more frequently) ─
+        $totalClaimed   = Cache::remember('kpi_claimed',   300, fn() =>
+            PayoutTransaction::where('claim_status', 'claimed')->count());
+        $totalUnclaimed = Cache::remember('kpi_unclaimed', 300, fn() =>
+            PayoutTransaction::where('claim_status', 'unclaimed')->count());
+        $totalCancelled = Cache::remember('kpi_cancelled', 300, fn() =>
+            PayoutTransaction::where('claim_status', 'cancelled')->count());
+        $totalAmount    = Cache::remember('kpi_amount',    300, fn() =>
+            PayoutTransaction::where('claim_status', 'claimed')->sum('amount'));
 
-        // Upcoming schedules
-        $upcomingSchedules = PayoutSchedule::with(['cycle', 'barangay'])
-            ->where('scheduled_date', '>=', now()->toDateString())
-            ->orderBy('scheduled_date')
-            ->take(5)
-            ->get();
+        // ── Active cycles (10 min TTL) ───────────────────────────────
+        $activeCycles = Cache::remember('kpi_active_cycles', 600, fn() =>
+            PayoutCycle::where('status', 'active')->get());
 
-        // Transactions by month (last 6 months)
-        $byMonth = PayoutTransaction::select(
+        // ── Upcoming schedules (5 min TTL) ───────────────────────────
+        $upcomingSchedules = Cache::remember('kpi_upcoming_schedules', 300, fn() =>
+            PayoutSchedule::with(['cycle', 'barangay'])
+                ->where('scheduled_date', '>=', now()->toDateString())
+                ->orderBy('scheduled_date')
+                ->take(5)
+                ->get());
+
+        // ── Monthly breakdown (5 min TTL) ────────────────────────────
+        $byMonth = Cache::remember('kpi_by_month', 300, fn() =>
+            PayoutTransaction::select(
                 DB::raw('DATE_FORMAT(created_at, "%b %Y") as month'),
                 DB::raw('YEAR(created_at) as year'),
                 DB::raw('MONTH(created_at) as month_num'),
@@ -73,10 +84,11 @@ class DashboardController extends Controller
             ->groupBy('month', 'year', 'month_num')
             ->orderBy('year')
             ->orderBy('month_num')
-            ->get();
+            ->get());
 
-        // Transactions by barangay
-        $byBarangay = Barangay::select(
+        // ── By barangay (5 min TTL) ───────────────────────────────────
+        $byBarangay = Cache::remember('kpi_by_barangay', 300, fn() =>
+            Barangay::select(
                 'barangays.id',
                 'barangays.name',
                 DB::raw('COUNT(payout_transactions.id) as total'),
@@ -88,7 +100,7 @@ class DashboardController extends Controller
             ->leftJoin('payout_transactions', 'payout_transactions.senior_id', '=', 'seniors.id')
             ->groupBy('barangays.id', 'barangays.name')
             ->orderByDesc('total')
-            ->get();
+            ->get());
 
         return view('dashboard', compact(
             'totalSeniors', 'totalCycles', 'totalBarangays',

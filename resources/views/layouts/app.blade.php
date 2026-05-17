@@ -748,6 +748,15 @@
             .app-shell { padding: 1rem; }
         }
 
+        /* ---------- KPI hover lift ---------- */
+.kpi {
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+.kpi:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, .08);
+}
+
         /* ---------- Print ---------- */
         @media print {
             .app-sidebar, .app-topbar, .page-actions, .no-print { display: none !important; }
@@ -885,15 +894,18 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // Sidebar toggle
     document.getElementById('sidebarToggle')?.addEventListener('click', function () {
         document.getElementById('appSidebar')?.classList.toggle('show');
     });
 
+    // Expanding search
     document.querySelectorAll('[data-expanding-search]').forEach(function (searchForm) {
-        const input = searchForm.querySelector('[data-expanding-search-input]');
+        const input      = searchForm.querySelector('[data-expanding-search-input]');
         const openButton = searchForm.querySelector('[data-expanding-search-button]');
-        const closeButton = searchForm.querySelector('[data-expanding-search-close]');
+        const closeButton= searchForm.querySelector('[data-expanding-search-close]');
 
         openButton?.addEventListener('click', function (event) {
             if (!searchForm.classList.contains('is-open')) {
@@ -908,9 +920,35 @@
                 window.location.href = searchForm.dataset.clearUrl;
                 return;
             }
-
             searchForm.classList.remove('is-open');
             input?.blur();
+        });
+    });
+
+    // Auto-dismiss alerts after 4 seconds
+    setTimeout(function () {
+        document.querySelectorAll('.alert').forEach(function (alert) {
+            alert.style.transition = 'opacity .4s ease, transform .4s ease';
+            alert.style.opacity    = '0';
+            alert.style.transform  = 'translateX(8px)';
+            setTimeout(function () { alert.remove(); }, 400);
+        });
+    }, 4000);
+
+    // Button loading spinner on form submit
+    document.querySelectorAll('form').forEach(function (form) {
+        form.addEventListener('submit', function () {
+            const btn = this.querySelector('button[type="submit"]');
+            if (btn && !btn.classList.contains('row-action') && !btn.classList.contains('no-load')) {
+                const original = btn.innerHTML;
+                btn.disabled   = true;
+                btn.innerHTML  = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Saving...';
+                // Re-enable after 8s as safety fallback
+                setTimeout(function () {
+                    btn.disabled  = false;
+                    btn.innerHTML = original;
+                }, 8000);
+            }
         });
     });
 </script>

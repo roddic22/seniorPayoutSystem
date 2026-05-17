@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class AuthController extends Controller
@@ -15,30 +16,49 @@ class AuthController extends Controller
     }
 
     public function login(Request $request): RedirectResponse
-    {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
+{
+    $credentials = $request->validate([
+        'email'    => ['required', 'email'],
+        'password' => ['required', 'string'],
+    ]);
+
+    if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        $request->session()->regenerate();
+
+        Log::info('User logged in', [
+            'user_id'   => Auth::id(),
+            'name'      => Auth::user()->name,
+            'role'      => Auth::user()->role,
+            'ip'        => $request->ip(),
+            'timestamp' => now()->toDateTimeString(),
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
-            return redirect()->intended(route('dashboard'));
-        }
-
-        return back()
-            ->withErrors(['email' => 'The provided credentials do not match our records.'])
-            ->onlyInput('email');
+        return redirect()->intended(route('dashboard'));
     }
 
-    public function logout(Request $request): RedirectResponse
-    {
-        Auth::logout();
+    Log::warning('Failed login attempt', [
+        'email'     => $request->email,
+        'ip'        => $request->ip(),
+        'timestamp' => now()->toDateTimeString(),
+    ]);
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+    return back()
+        ->withErrors(['email' => 'The provided credentials do not match our records.'])
+        ->onlyInput('email');
+}
 
-        return redirect()->route('login');
-    }
+public function logout(Request $request): RedirectResponse
+{
+    Log::info('User logged out', [
+        'user_id'   => Auth::id(),
+        'name'      => Auth::user()->name,
+        'timestamp' => now()->toDateTimeString(),
+    ]);
+
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()->route('login');
+}
 }
