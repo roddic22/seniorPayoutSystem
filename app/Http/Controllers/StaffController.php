@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class StaffController extends Controller
 {
@@ -79,7 +80,7 @@ class StaffController extends Controller
 
     public function destroy(User $staff)
     {
-        if ($staff->id === auth()->id()) {
+        if ($staff->id === Auth::id()) {
             return redirect()->route('staff.index')
                 ->withErrors(['error' => 'You cannot delete your own account.']);
         }
