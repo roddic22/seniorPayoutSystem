@@ -554,7 +554,7 @@
         }
 
         .expanding-search.is-open {
-            width: 2in;
+            width: 3in;
             border-color: #bfdbfe;
             box-shadow: 0 0 0 .18rem rgba(29, 78, 216, .08);
         }

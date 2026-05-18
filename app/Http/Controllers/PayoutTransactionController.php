@@ -43,7 +43,7 @@ class PayoutTransactionController extends Controller
                         });
                 });
             })
-            ->oldest()
+            ->latest()
             ->paginate(10)
             ->withQueryString();
 

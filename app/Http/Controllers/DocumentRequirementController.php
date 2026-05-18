@@ -26,7 +26,7 @@ class DocumentRequirementController extends Controller
             'cycle_id'      => 'required|exists:payout_cycles,id',
             'document_name' => 'required|string|max:255',
             'description'   => 'nullable|string',
-            'is_mandatory'  => 'boolean',
+            'is_mandatory'  => 'nullable|boolean',
         ]);
 
         DocumentRequirement::create([
@@ -57,6 +57,7 @@ class DocumentRequirementController extends Controller
             'cycle_id'      => 'required|exists:payout_cycles,id',
             'document_name' => 'required|string|max:255',
             'description'   => 'nullable|string',
+            'is_mandatory'  => 'nullable|boolean',
         ]);
 
         $documentRequirement->update([

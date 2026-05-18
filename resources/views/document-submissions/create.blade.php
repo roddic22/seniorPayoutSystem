@@ -1,16 +1,16 @@
 @extends('layouts.app')
-@section('topbar-title', 'Add Document Submission')
+@section('topbar-title', 'Submit Document')
 @section('content')
 @php
     $backUrl = $selectedSr
         ? route('seniors.show', $selectedSr)
-        : ($selectedTx ? route('payout-transactions.show', $selectedTx) : route('seniors.index'));
+        : ($selectedTx ? route('payout-transactions.show', $selectedTx) : route('document-submissions.index'));
 @endphp
 
 <div class="page-head">
     <div>
-        <div class="page-eyebrow">Document Submissions</div>
-        <h2 class="page-title">Record document submission</h2>
+        <div class="page-eyebrow">Submit Documents</div>
+        <h2 class="page-title">Submit document</h2>
     </div>
     <div class="page-actions">
         <a href="{{ $backUrl }}" class="btn btn-secondary">
@@ -28,6 +28,9 @@
         @csrf
         @if($selectedSr)
             <input type="hidden" name="source_senior_id" value="{{ $selectedSr }}">
+        @endif
+        @if(!$selectedSr && !$selectedTx)
+            <input type="hidden" name="source_context" value="document-submissions">
         @endif
         <div class="form-section">
             <div class="mb-3">
@@ -67,7 +70,9 @@
             </div>
         </div>
         <div class="form-footer">
-            <a href="{{ $backUrl }}" class="btn btn-secondary">Cancel</a>
+            <a href="{{ $backUrl }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Back
+            </a>
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-check-lg me-1"></i> Save Submission
             </button>

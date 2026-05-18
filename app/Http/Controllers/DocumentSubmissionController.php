@@ -4,16 +4,66 @@ namespace App\Http\Controllers;
 use App\Models\DocumentSubmission;
 use App\Models\PayoutTransaction;
 use App\Models\DocumentRequirement;
+use App\Models\Barangay;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DocumentSubmissionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = trim((string) $request->query('search', ''));
+        $selectedBarangayId = $request->integer('barangay_id') ?: null;
+        $selectedBarangay = $selectedBarangayId ? Barangay::find($selectedBarangayId) : null;
+
+        $barangays = Barangay::select(
+                'barangays.*',
+                DB::raw('COUNT(document_submissions.id) as submissions_count')
+            )
+            ->leftJoin('seniors', 'seniors.barangay_id', '=', 'barangays.id')
+            ->leftJoin('payout_transactions', 'payout_transactions.senior_id', '=', 'seniors.id')
+            ->leftJoin('document_submissions', 'document_submissions.transaction_id', '=', 'payout_transactions.id')
+            ->groupBy('barangays.id', 'barangays.name', 'barangays.city', 'barangays.created_at', 'barangays.updated_at')
+            ->orderBy('barangays.name')
+            ->get();
+
         $submissions = DocumentSubmission::with([
-            'transaction.senior', 'requirement'
-        ])->oldest()->paginate(10);
-        return view('document-submissions.index', compact('submissions'));
+                'transaction.senior.barangay', 'transaction.cycle', 'requirement'
+            ])
+            ->when($selectedBarangay, function ($query) use ($selectedBarangay) {
+                $query->whereHas('transaction.senior', function ($query) use ($selectedBarangay) {
+                    $query->where('barangay_id', $selectedBarangay->id);
+                });
+            })
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('notes', 'like', '%' . $search . '%')
+                        ->orWhereHas('transaction.senior', function ($query) use ($search) {
+                            $query->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('osca_id', 'like', '%' . $search . '%');
+                        })
+                        ->orWhereHas('transaction.senior.barangay', function ($query) use ($search) {
+                            $query->where('name', 'like', '%' . $search . '%');
+                        })
+                        ->orWhereHas('transaction.cycle', function ($query) use ($search) {
+                            $query->where('cycle_name', 'like', '%' . $search . '%');
+                        })
+                        ->orWhereHas('requirement', function ($query) use ($search) {
+                            $query->where('document_name', 'like', '%' . $search . '%');
+                        });
+                });
+            })
+            ->oldest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('document-submissions.index', compact(
+            'submissions',
+            'barangays',
+            'selectedBarangay',
+            'selectedBarangayId',
+            'search'
+        ));
     }
 
     public function create(Request $request)

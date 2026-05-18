@@ -11,6 +11,10 @@ class DocumentRequirement extends Model
         'description', 'is_mandatory'
     ];
 
+    protected $casts = [
+        'is_mandatory' => 'boolean',
+    ];
+
     public function cycle()
     {
         return $this->belongsTo(PayoutCycle::class, 'cycle_id');
