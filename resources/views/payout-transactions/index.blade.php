@@ -9,32 +9,31 @@
         <div class="page-sub">Disbursement records and claim status.</div>
     </div>
     <div class="page-actions">
-        <form
-            method="GET"
-            action="{{ route('payout-transactions.index') }}"
-            class="expanding-search {{ $search !== '' ? 'is-open' : '' }}"
-            data-clear-url="{{ route('payout-transactions.index') }}"
-            data-expanding-search
-        >
-            <input
-                type="search"
-                name="search"
-                class="expanding-search-input"
-                value="{{ $search }}"
-                placeholder="Search"
-                aria-label="Search transactions"
-                data-expanding-search-input
-            >
-            <button type="submit" class="expanding-search-btn" aria-label="Search" data-expanding-search-button>
-                <i class="bi bi-search"></i>
-            </button>
-            <button type="button" class="expanding-search-close" aria-label="Close search" data-expanding-search-close>
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </form>
         <a href="{{ route('payout-transactions.create') }}" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i> Record transaction
         </a>
+    </div>
+</div>
+
+<div class="surface mb-3">
+    <div class="surface-body">
+        <form method="GET" action="{{ route('payout-transactions.index') }}" class="row g-2 align-items-end">
+            <div class="col-md-9">
+                <label for="search" class="form-label">Search transactions</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="search" name="search" id="search" class="form-control"
+                        value="{{ $search }}"
+                        placeholder="Search senior, OSCA ID, barangay, cycle, counter, status, or amount">
+                </div>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">Search</button>
+                @if($search !== '')
+                    <a href="{{ route('payout-transactions.index') }}" class="btn btn-secondary">Clear</a>
+                @endif
+            </div>
+        </form>
     </div>
 </div>
 
