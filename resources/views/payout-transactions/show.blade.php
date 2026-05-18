@@ -21,6 +21,25 @@
     </div>
 </div>
 
+<ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="transaction-info-tab" data-bs-toggle="tab"
+            data-bs-target="#transaction-info" type="button" role="tab"
+            aria-controls="transaction-info" aria-selected="true">
+            Transaction
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="transaction-submissions-tab" data-bs-toggle="tab"
+            data-bs-target="#transaction-submissions" type="button" role="tab"
+            aria-controls="transaction-submissions" aria-selected="false">
+            Submissions
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+<div class="tab-pane fade show active" id="transaction-info" role="tabpanel" aria-labelledby="transaction-info-tab" tabindex="0">
 <div class="surface mb-3">
     <div class="surface-head">
         <h5>Transaction information</h5>
@@ -78,7 +97,10 @@
     </div>
 @endif
 
-<div class="surface mt-3">
+</div>
+
+<div class="tab-pane fade" id="transaction-submissions" role="tabpanel" aria-labelledby="transaction-submissions-tab" tabindex="0">
+<div class="surface">
     <div class="surface-head">
         <h5><i class="bi bi-file-earmark-check me-2"></i>Document Submissions</h5>
         @if(auth()->user()->role !== 'staff')
@@ -101,9 +123,14 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($payoutTransaction->submissions as $sub)
+                @forelse($payoutTransaction->submissions->sortByDesc(fn($sub) => (bool) ($sub->requirement?->is_mandatory))->values() as $sub)
                 <tr>
-                    <td>{{ $sub->requirement->document_name ?? '—' }}</td>
+                    <td>
+                        {{ $sub->requirement->document_name ?? '—' }}
+                        @if($sub->requirement?->is_mandatory)
+                            <span class="pill pill-warning ms-1">Required</span>
+                        @endif
+                    </td>
                     <td>
                         @if($sub->is_submitted)
                             <span class="pill pill-success">Submitted</span>
@@ -132,10 +159,28 @@
                     @endif
                 </tr>
                 @empty
-                <tr><td colspan="4" class="table-empty">No submissions recorded yet.</td></tr>
+                <tr>
+                    <td colspan="{{ auth()->user()->role !== 'staff' ? 4 : 3 }}" class="table-empty">
+                        No submissions recorded yet.
+                    </td>
+                </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 </div>
+</div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+    const transactionHash = window.location.hash;
+    if (transactionHash) {
+        const tabButton = document.querySelector(`[data-bs-target="${transactionHash}"]`);
+        if (tabButton) {
+            bootstrap.Tab.getOrCreateInstance(tabButton).show();
+        }
+    }
+</script>
+@endpush

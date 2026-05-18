@@ -74,7 +74,9 @@ class DocumentSubmissionController extends Controller
             })
             ->oldest()
             ->get();
-        $requirements  = DocumentRequirement::all();
+        $requirements = DocumentRequirement::orderByDesc('is_mandatory')
+            ->orderBy('document_name')
+            ->get();
         $selectedTx    = $request->transaction_id;
         $selectedSr    = $request->senior_id;
         return view('document-submissions.create', compact(
@@ -86,35 +88,50 @@ class DocumentSubmissionController extends Controller
     {
         $request->validate([
             'transaction_id'  => 'required|exists:payout_transactions,id',
-            'requirement_id'  => 'required|exists:document_requirements,id',
+            'requirement_ids' => 'required|array|min:1',
+            'requirement_ids.*' => 'exists:document_requirements,id',
             'is_submitted'    => 'nullable|boolean',
             'notes'           => 'nullable|string|max:255',
             'source_senior_id' => 'nullable|exists:seniors,id',
         ]);
 
-        $exists = DocumentSubmission::where('transaction_id', $request->transaction_id)
-            ->where('requirement_id', $request->requirement_id)
-            ->exists();
+        $requirementIds = collect($request->input('requirement_ids', []))
+            ->map(fn($id) => (int) $id)
+            ->unique()
+            ->values();
 
-        if ($exists) {
+        $existingRequirementIds = DocumentSubmission::where('transaction_id', $request->transaction_id)
+            ->whereIn('requirement_id', $requirementIds)
+            ->pluck('requirement_id')
+            ->map(fn($id) => (int) $id);
+
+        $newRequirementIds = $requirementIds->diff($existingRequirementIds);
+
+        if ($newRequirementIds->isEmpty()) {
             return back()->withInput()
-                ->with('error', 'This document has already been recorded for this transaction.');
+                ->with('error', 'The selected documents have already been recorded for this transaction.');
         }
 
-        DocumentSubmission::create([
-            'transaction_id' => $request->transaction_id,
-            'requirement_id' => $request->requirement_id,
-            'is_submitted'   => $request->has('is_submitted') ? 1 : 0,
-            'notes'          => $request->notes,
-        ]);
+        $newRequirementIds->each(function ($requirementId) use ($request) {
+            DocumentSubmission::create([
+                'transaction_id' => $request->transaction_id,
+                'requirement_id' => $requirementId,
+                'is_submitted'   => $request->has('is_submitted') ? 1 : 0,
+                'notes'          => $request->notes,
+            ]);
+        });
+
+        $message = $newRequirementIds->count() === 1
+            ? 'Document submission recorded.'
+            : $newRequirementIds->count() . ' document submissions recorded.';
 
         if ($request->filled('source_senior_id')) {
-            return redirect()->route('seniors.show', $request->source_senior_id)
-                ->with('success', 'Document submission recorded.');
+            return redirect()->to(route('seniors.show', $request->source_senior_id) . '#senior-submissions')
+                ->with('success', $message);
         }
 
-        return redirect()->route('payout-transactions.show', $request->transaction_id)
-            ->with('success', 'Document submission recorded.');
+        return redirect()->to(route('payout-transactions.show', $request->transaction_id) . '#transaction-submissions')
+            ->with('success', $message);
     }
 
     public function show(DocumentSubmission $documentSubmission)
@@ -126,7 +143,9 @@ class DocumentSubmissionController extends Controller
     public function edit(DocumentSubmission $documentSubmission)
     {
         $transactions = PayoutTransaction::with(['senior', 'cycle'])->oldest()->get();
-        $requirements = DocumentRequirement::all();
+        $requirements = DocumentRequirement::orderByDesc('is_mandatory')
+            ->orderBy('document_name')
+            ->get();
         return view('document-submissions.edit', compact(
             'documentSubmission', 'transactions', 'requirements'
         ));
@@ -148,7 +167,7 @@ class DocumentSubmissionController extends Controller
             'notes'          => $request->notes,
         ]);
 
-        return redirect()->route('payout-transactions.show', $documentSubmission->transaction_id)
+        return redirect()->to(route('payout-transactions.show', $documentSubmission->transaction_id) . '#transaction-submissions')
             ->with('success', 'Document submission updated.');
     }
 
@@ -156,7 +175,7 @@ class DocumentSubmissionController extends Controller
     {
         $txId = $documentSubmission->transaction_id;
         $documentSubmission->delete();
-        return redirect()->route('payout-transactions.show', $txId)
+        return redirect()->to(route('payout-transactions.show', $txId) . '#transaction-submissions')
             ->with('success', 'Document submission removed.');
     }
 }
