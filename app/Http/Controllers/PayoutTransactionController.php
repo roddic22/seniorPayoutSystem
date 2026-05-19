@@ -81,7 +81,7 @@ class PayoutTransactionController extends Controller
                         'cycle_id'     => $request->cycle_id,
                         'attempted_by' => Auth::user()->name,
                         'role'         => Auth::user()->role,
-                        'ip'           => request()->ip(),
+                        'ip'           => $request->ip(),
                         'timestamp'    => now()->toDateTimeString(),
                     ]);
                     throw new \Exception('This senior has already claimed payout for this cycle.');
