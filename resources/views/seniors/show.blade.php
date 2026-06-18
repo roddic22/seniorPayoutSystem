@@ -18,6 +18,25 @@
     </div>
 </div>
 
+<ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="senior-profile-tab" data-bs-toggle="tab"
+            data-bs-target="#senior-profile" type="button" role="tab"
+            aria-controls="senior-profile" aria-selected="true">
+            Profile
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="senior-submissions-tab" data-bs-toggle="tab"
+            data-bs-target="#senior-submissions" type="button" role="tab"
+            aria-controls="senior-submissions" aria-selected="false">
+            Submissions
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+<div class="tab-pane fade show active" id="senior-profile" role="tabpanel" aria-labelledby="senior-profile-tab" tabindex="0">
 <div class="surface">
     <div class="surface-head">
         <h5>Profile</h5>
@@ -71,8 +90,10 @@
         </dl>
     </div>
 </div>
+</div>
 
-<div class="surface mt-3">
+<div class="tab-pane fade" id="senior-submissions" role="tabpanel" aria-labelledby="senior-submissions-tab" tabindex="0">
+<div class="surface">
     <div class="surface-head">
         <h5><i class="bi bi-file-earmark-check me-2"></i>Document Submissions</h5>
         @if(auth()->user()->role !== 'staff')
@@ -96,10 +117,15 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($documentSubmissions as $sub)
+                @forelse($documentSubmissions->sortByDesc(fn($sub) => (bool) ($sub->requirement?->is_mandatory))->values() as $sub)
                 <tr>
                     <td>{{ $sub->transaction->cycle->cycle_name ?? '—' }}</td>
-                    <td>{{ $sub->requirement->document_name ?? '—' }}</td>
+                    <td>
+                        {{ $sub->requirement->document_name ?? '—' }}
+                        @if($sub->requirement?->is_mandatory)
+                            <span class="pill pill-warning ms-1">Required</span>
+                        @endif
+                    </td>
                     <td>
                         @if($sub->is_submitted)
                             <span class="pill pill-success">Yes</span>
@@ -128,4 +154,18 @@
         </table>
     </div>
 </div>
+</div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+    const seniorHash = window.location.hash;
+    if (seniorHash) {
+        const tabButton = document.querySelector(`[data-bs-target="${seniorHash}"]`);
+        if (tabButton) {
+            bootstrap.Tab.getOrCreateInstance(tabButton).show();
+        }
+    }
+</script>
+@endpush
